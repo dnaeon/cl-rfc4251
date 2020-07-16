@@ -35,7 +35,7 @@
 
 (defun make-binary-input-stream (data &key (start 0) (end (length data)))
   "Creates a new instance of BINARY-INPUT-STREAM class"
-  (assert (>= start 0) (start))
+  (assert (<= 0 start (length data)) (start))
   (assert (<= 0 end (length data)) (end))
   (make-instance 'binary-input-stream
                  :data data
