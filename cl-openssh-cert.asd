@@ -4,6 +4,7 @@
 
 (defsystem "cl-openssh-cert"
   :name "cl-openssh-cert"
+  :long-name "cl-openssh-cert"
   :description "Common Lisp library for parsing OpenSSH certificates"
   :version "0.1.0"
   :author "Marin Atanasov Nikolov <dnaeon@gmail.com>"
@@ -14,9 +15,11 @@
   :homepage "https://github.com/dnaeon/cl-openssh-cert"
   :bug-tracker "https://github.com/dnaeon/cl-openssh-cert"
   :source-control "https://github.com/dnaeon/cl-openssh-cert"
+  :depends-on (:trivial-gray-streams)
   :components ((:module "core"
                 :pathname #P"src/"
                 :components ((:file "binary")
+                             (:file "stream")
                              (:file "core" :depends-on ("binary"))))
                (:module "client-package"
                 :pathname #P"src/"
