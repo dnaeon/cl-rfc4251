@@ -7,7 +7,13 @@
    :fundamental-binary-input-stream
    :fundamental-binary-output-stream
    :stream-read-byte
-   :stream-write-byte))
+   :stream-write-byte)
+  (:export
+   :binary-input-stream
+   :binary-input-stream-data
+   :binary-input-stream-index
+   :binary-input-stream-end
+   :make-binary-input-stream))
 (in-package :cl-openssh-cert.stream)
 
 (defclass binary-input-stream (fundamental-binary-input-stream)
