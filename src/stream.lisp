@@ -20,21 +20,23 @@
   ((data
     :initarg :data
     :initform (error "Must provide vector data")
-    :accessor binary-input-stream-data
+    :reader binary-input-stream-data
     :documentation "A vector providing the underlying data")
    (index
     :initarg :index
     :initform 0
-    :accessor binary-input-stream-index
+    :reader binary-input-stream-index
     :documentation "Current index position in the data")
    (end
     :initarg :end
-    :accessor binary-input-stream-end
+    :reader binary-input-stream-end
     :documentation "End marker up to which bytes are to be read"))
   (:documentation "Binary input stream class using a vector as the underlying data"))
 
 (defun make-binary-input-stream (data &key (start 0) (end (length data)))
   "Creates a new instance of BINARY-INPUT-STREAM class"
+  (assert (>= start 0) (start))
+  (assert (<= 0 end (length data)) (end))
   (make-instance 'binary-input-stream
                  :data data
                  :index start
