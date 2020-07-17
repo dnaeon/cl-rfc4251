@@ -1,7 +1,9 @@
 (in-package :cl-user)
 (defpackage :cl-openssh-cert.binary
   (:use :cl)
-  (:nicknames :openssh-cert.binary :ssh-cert.binary))
+  (:nicknames :openssh-cert.binary :ssh-cert.binary)
+  (:export
+   :decode))
 (in-package :cl-openssh-cert.binary)
 
 (defgeneric decode (type stream &key)
