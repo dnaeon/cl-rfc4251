@@ -8,7 +8,10 @@
    :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
-   :make-binary-input-stream))
+   :make-binary-input-stream)
+  (:import-from
+   :openssh-cert.binary
+   :decode))
 (in-package :cl-openssh-cert.test)
 
 (defparameter *binary-input-stream-data*
@@ -60,3 +63,15 @@
         "Out of bounds :end value")
     (ok (signals (make-binary-input-stream *binary-input-stream-data* :start 1000 :end 1000))
         "Invalid :start and :end values")))
+
+(deftest binary-decoder
+  (testing "decode raw bytes"
+    (let ((stream (make-binary-input-stream *binary-input-stream-data*)))
+      (ok (equalp #(1 2 3 4) (decode :raw-bytes stream :length 4))
+          "Decode first slice of four bytes")
+      (ok (equalp #(5 6 7 8) (decode :raw-bytes stream :length 4))
+          "Decode second slice of four bytes")
+      (ok (signals (decode :raw-bytes stream :length 1000))
+          "Decode out of bounds :length bytes")
+      (ok (signals (decode :raw-bytes stream :length -1000))
+          "Decode bytes with invalid :length value"))))
