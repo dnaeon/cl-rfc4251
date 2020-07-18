@@ -71,6 +71,8 @@
           "Decode first slice of four bytes")
       (ok (equalp #(5 6 7 8) (decode :raw-bytes stream :length 4))
           "Decode second slice of four bytes")
+      (ok (equalp #(9 10 :eof :eof) (decode :raw-bytes stream :length 4 :eof-error-p nil :eof-value :eof))
+          "Decode third slice with eof values")
       (ok (signals (decode :raw-bytes stream :length 1000))
           "Decode out of bounds :length bytes")
       (ok (signals (decode :raw-bytes stream :length -1000))
