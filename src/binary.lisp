@@ -40,3 +40,19 @@
 (defmethod decode ((type (eql :uint16-le)) stream &key)
   "Decode 16-bit unsigned integer using little-endian byte order"
   (decode-uint-le (decode :raw-bytes stream :length 2)))
+
+(defmethod decode ((type (eql :uint32-be)) stream &key)
+  "Decode 32-bit unsigned integer using big-endian byte order"
+  (decode-uint-be (decode :raw-bytes stream :length 4)))
+
+(defmethod decode ((type (eql :uint32-le)) stream &key)
+  "Decode 32-bit unsigned integer using little-endian byte order"
+  (decode-uint-le (decode :raw-bytes stream :length 4)))
+
+(defmethod decode ((type (eql :uint64-be)) stream &key)
+  "Decode 64-bit unsigned integer using big-endian byte order"
+  (decode-uint-be (decode :raw-bytes stream :length 8)))
+
+(defmethod decode ((type (eql :uint64-le)) stream &key)
+  "Decode 64-bit unsigned integer using little-endian byte order"
+  (decode-uint-le (decode :raw-bytes stream :length 8)))
