@@ -34,5 +34,9 @@
     result))
 
 (defmethod decode ((type (eql :uint16-be)) stream &key)
-  "Decode 16-bit unsigned integer from the given binary stream"
+  "Decode 16-bit unsigned integer using big-endian byte order"
   (decode-uint-be (decode :raw-bytes stream :length 2)))
+
+(defmethod decode ((type (eql :uint16-le)) stream &key)
+  "Decode 16-bit unsigned integer using little-endian byte order"
+  (decode-uint-le (decode :raw-bytes stream :length 2)))
