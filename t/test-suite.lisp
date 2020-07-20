@@ -104,4 +104,12 @@
            (stream-be (make-binary-input-stream data))
            (stream-le (make-binary-input-stream data)))
       (ok (= #x000000000000ABCD (decode :uint64-be stream-be)) "Decode uint64-be")
-      (ok (= #xCDAB000000000000 (decode :uint64-le stream-le)) "Decode uint64-le"))))
+      (ok (= #xCDAB000000000000 (decode :uint64-le stream-le)) "Decode uint64-le")))
+
+  (testing "decode string"
+    (let ((stream1 (make-binary-input-stream #(#x00 #x00 #x00 #x07 #x74 #x65 #x73 #x74 #x69 #x6E #x67)))
+          (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x00)))
+          (stream3 (make-binary-input-stream #(#x00 #x00)))) ;; Invalid length, should be uint32
+      (ok (string= "testing" (decode :string stream1)) "Decode non-empty string value")
+      (ok (string= "" (decode :string stream2)) "Decode empty string value")
+      (ok (signals (decode :string stream3)) "Invalid string length"))))
