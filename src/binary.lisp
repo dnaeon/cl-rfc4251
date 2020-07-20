@@ -35,8 +35,7 @@
 
 (defmethod decode ((type (eql :boolean)) stream &key)
   "Decode a boolean value from the given binary stream"
-  (let* ((data (decode :raw-bytes stream :length 1))
-         (value (aref data 0)))
+  (let* ((value (read-byte stream)))
     (if (zerop value)
         nil
         t)))
@@ -64,3 +63,12 @@
 (defmethod decode ((type (eql :uint64-le)) stream &key)
   "Decode 64-bit unsigned integer using little-endian byte order"
   (decode-uint-le (decode :raw-bytes stream :length 8)))
+
+(defmethod decode ((type (eql :string)) stream &key)
+  "Decode a string value from the given binary stream"
+  (let ((length (decode :uint32-be stream))
+        (result (make-string-output-stream)))
+    (loop repeat length
+          for char = (code-char (read-byte stream))
+          do (write-char char result))
+    (get-output-stream-string result)))
