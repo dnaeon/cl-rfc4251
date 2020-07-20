@@ -78,6 +78,13 @@
       (ok (signals (decode :raw-bytes stream :length -1000))
           "Decode bytes with invalid :length value")))
 
+  (testing "decode boolean"
+    (let ((stream (make-binary-input-stream #(0 1 42 128))))
+      (ok (equal nil (decode :boolean stream)) "Decode 0 as false")
+      (ok (equal t (decode :boolean stream)) "Decode 1 as true")
+      (ok (equal t (decode :boolean stream)) "Decode 42 as true")
+      (ok (equal t (decode :boolean stream)) "Decode 128 as true")))
+
   (testing "decode uint16"
     (let* ((data #(#xAB #xCD))
            (stream-be (make-binary-input-stream data))
