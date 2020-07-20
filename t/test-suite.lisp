@@ -79,8 +79,22 @@
           "Decode bytes with invalid :length value")))
 
   (testing "decode uint16"
-    (let* ((data #(#xab #xcd))
+    (let* ((data #(#xAB #xCD))
            (stream-be (make-binary-input-stream data))
            (stream-le (make-binary-input-stream data)))
-      (ok (= #xabcd (decode :uint16-be stream-be)) "Decode uint16-be")
-      (ok (= #xcdab (decode :uint16-le stream-le)) "Decode uint16-le"))))
+      (ok (= #xABCD (decode :uint16-be stream-be)) "Decode uint16-be")
+      (ok (= #xCDAB (decode :uint16-le stream-le)) "Decode uint16-le")))
+
+  (testing "decode uint32"
+    (let* ((data #(#x00 #x00 #xAB #xCD))
+           (stream-be (make-binary-input-stream data))
+           (stream-le (make-binary-input-stream data)))
+      (ok (= #x0000ABCD (decode :uint32-be stream-be)) "Decode uint32-be")
+      (ok (= #xCDAB0000 (decode :uint32-le stream-le)) "Decode uint32-le")))
+
+  (testing "decode uint64"
+    (let* ((data #(#x00 #x00 #x00 #x00 #x00 #x00 #xAB #xCD))
+           (stream-be (make-binary-input-stream data))
+           (stream-le (make-binary-input-stream data)))
+      (ok (= #x000000000000ABCD (decode :uint64-be stream-be)) "Decode uint64-be")
+      (ok (= #xCDAB000000000000 (decode :uint64-le stream-le)) "Decode uint64-le"))))
