@@ -76,4 +76,11 @@
       (ok (signals (decode :raw-bytes stream :length 1000))
           "Decode out of bounds :length bytes")
       (ok (signals (decode :raw-bytes stream :length -1000))
-          "Decode bytes with invalid :length value"))))
+          "Decode bytes with invalid :length value")))
+
+  (testing "decode uint16"
+    (let* ((data #(#xab #xcd))
+           (stream-be (make-binary-input-stream data))
+           (stream-le (make-binary-input-stream data)))
+      (ok (= #xabcd (decode :uint16-be stream-be)) "Decode uint16-be")
+      (ok (= #xcdab (decode :uint16-le stream-le)) "Decode uint16-le"))))
