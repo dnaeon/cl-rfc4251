@@ -33,6 +33,14 @@
       (vector-push (read-byte stream eof-error-p eof-value) result))
     result))
 
+(defmethod decode ((type (eql :boolean)) stream &key)
+  "Decode a boolean value from the given binary stream"
+  (let* ((data (decode :raw-bytes stream :length 1))
+         (value (aref data 0)))
+    (if (zerop value)
+        nil
+        t)))
+
 (defmethod decode ((type (eql :uint16-be)) stream &key)
   "Decode 16-bit unsigned integer using big-endian byte order"
   (decode-uint-be (decode :raw-bytes stream :length 2)))
