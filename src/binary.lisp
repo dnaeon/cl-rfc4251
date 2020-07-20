@@ -33,3 +33,6 @@
       (vector-push (read-byte stream eof-error-p eof-value) result))
     result))
 
+(defmethod decode ((type (eql :uint16-be)) stream &key)
+  "Decode 16-bit unsigned integer from the given binary stream"
+  (decode-uint-be (decode :raw-bytes stream :length 2)))
