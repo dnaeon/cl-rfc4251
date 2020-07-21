@@ -112,4 +112,16 @@
           (stream3 (make-binary-input-stream #(#x00 #x00)))) ;; Invalid length, should be uint32
       (ok (string= "testing" (decode :string stream1)) "Decode non-empty string value")
       (ok (string= "" (decode :string stream2)) "Decode empty string value")
-      (ok (signals (decode :string stream3)) "Invalid string length"))))
+      (ok (signals (decode :string stream3)) "Invalid string length")))
+
+  (testing "decode mpint"
+    (let ((stream1 (make-binary-input-stream #(#x00 #x00 #x00 #x00)))
+          (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x08 #x09 #xA3 #x78 #xF9 #xB2 #xE3 #x32 #xA7)))
+          (stream3 (make-binary-input-stream #(#x00 #x00 #x00 #x02 #x00 #x80)))
+          (stream4 (make-binary-input-stream #(#x00 #x00 #x00 #x02 #xED #xCC)))
+          (stream5 (make-binary-input-stream #(#x00 #x00 #x00 #x05 #xFF #x21 #x52 #x41 #x11))))
+      (ok (= #x0 (decode :mpint stream1)) "Decode mpint 0 value")
+      (ok (= #x9A378F9B2E332A7 (decode :mpint stream2)) "Decode mpint #x9A378F9B2E332A7 value")
+      (ok (= #x80 (decode :mpint stream3)) "Decode mpint #x80 value")
+      (ok (= #x-1234 (decode :mpint stream4)) "Decode mpint #x-1234 value")
+      (ok (= #x-DEADBEEF (decode :mpint stream5)) "Decode mpint #x-DEADBEEF value"))))
