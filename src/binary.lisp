@@ -5,7 +5,8 @@
   (:export
    :decode
    :decode-uint-be
-   :decode-uint-le))
+   :decode-uint-le
+   :decode-mpint-be))
 (in-package :cl-openssh-cert.binary)
 
 (defun decode-uint-be (bytes)
@@ -20,6 +21,20 @@
 (defun decode-uint-le (bytes)
   "Decode a vector of bytes into unsigned integer, using litte-endian byte order"
   (decode-uint-be (reverse bytes)))
+
+(defun decode-mpint-be (bytes)
+  ;; Positive numbers are preceeded by a zero byte
+  (let* ((leading-byte (aref bytes 0))
+         (leading-zero-byte-p (zerop leading-byte))
+         (n-bits (if leading-zero-byte-p
+                     (* (1- (length bytes)) 8)
+                     (* (length bytes) 8)))
+         (complement (decode-uint-be bytes))
+         (value (- (expt 2 n-bits) complement)))
+    ;; Positive numbers have their most significant bit set to 0
+    (if (zerop (ldb (byte 1 7) leading-byte))
+        (abs value)
+        (- value))))
 
 (defgeneric decode (type stream &key)
   (:documentation "Decode a value with the given type and stream" ))
@@ -72,3 +87,13 @@
           for char = (code-char (read-byte stream))
           do (write-char char result))
     (get-output-stream-string result)))
+
+(defmethod decode ((type (eql :mpint)) stream &key)
+  "Decode a multiple precision integer in two's complement format"
+  (let* ((length (decode :uint32-be stream))
+         (bytes (make-array length :fill-pointer 0)))
+    (when (zerop length)
+      (return-from decode 0))
+    (loop repeat length
+          do (vector-push (read-byte stream) bytes))
+    (decode-mpint-be bytes)))
