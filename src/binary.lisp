@@ -65,6 +65,10 @@
       (vector-push (read-byte stream eof-error-p eof-value) result))
     result))
 
+(defmethod decode ((type (eql :byte)) stream &key (eof-error-p t) eof-value)
+  "Decode a single byte (octet) from the given binary stream"
+  (read-byte stream eof-error-p eof-value))
+
 (defmethod decode ((type (eql :boolean)) stream &key)
   "Decode a boolean value from the given binary stream"
   (let* ((value (read-byte stream)))

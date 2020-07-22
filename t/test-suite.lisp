@@ -103,6 +103,14 @@
       (ok (signals (decode :raw-bytes stream :length -1000))
           "Decode bytes with invalid :length value")))
 
+  (testing "decode byte"
+    (let ((stream (make-binary-input-stream *binary-input-stream-data*)))
+      (loop for index below (length *binary-input-stream-data*) do
+        (ok (= (1+ index) (decode :byte stream))
+            (format nil "Decode byte at index ~r"  index)))
+      (ok (signals (decode :byte stream)) "End of stream")
+      (ok (equal :eof (decode :byte stream :eof-error-p nil :eof-value :eof)) "Decode with EOF value")))
+
   (testing "decode boolean"
     (let ((stream (make-binary-input-stream #(0 1 42 128))))
       (ok (equal nil (decode :boolean stream)) "Decode 0 as false")
