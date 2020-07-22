@@ -22,19 +22,11 @@
   "Decode a vector of bytes into unsigned integer, using litte-endian byte order"
   (decode-uint-be (reverse bytes)))
 
-(defun decode-mpint-be (bytes)
-  ;; Positive numbers are preceeded by a zero byte
-  (let* ((leading-byte (aref bytes 0))
-         (leading-zero-byte-p (zerop leading-byte))
-         (n-bits (if leading-zero-byte-p
-                     (* (1- (length bytes)) 8)
-                     (* (length bytes) 8)))
-         (complement (decode-uint-be bytes))
-         (value (- (expt 2 n-bits) complement)))
-    ;; Positive numbers have their most significant bit set to 0
-    (if (zerop (ldb (byte 1 7) leading-byte))
-        (abs value)
-        (- value))))
+(defun decode-twos-complement (bytes &optional (n-bits (* (length bytes) 8)))
+  "Decodes a two's complement value"
+  (let ((mask (expt 2 (1- n-bits)))
+        (c (decode-uint-be bytes)))
+    (+ (- (logand c mask)) (logand c (lognot mask)))))
 
 (defgeneric decode (type stream &key)
   (:documentation "Decode a value with the given type and stream" ))
@@ -96,4 +88,4 @@
       (return-from decode 0))
     (loop repeat length
           do (vector-push (read-byte stream) bytes))
-    (decode-mpint-be bytes)))
+    (decode-twos-complement bytes)))
