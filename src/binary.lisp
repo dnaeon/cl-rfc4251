@@ -84,6 +84,10 @@
   "Decode 16-bit unsigned integer using little-endian byte order"
   (decode-uint-le (decode :raw-bytes stream :length 2)))
 
+(defmethod decode ((type (eql :uint16)) stream &key)
+  "Synonym for :uint16-be"
+  (decode :uint16-be stream))
+
 (defmethod decode ((type (eql :uint32-be)) stream &key)
   "Decode 32-bit unsigned integer using big-endian byte order"
   (decode-uint-be (decode :raw-bytes stream :length 4)))
@@ -92,6 +96,10 @@
   "Decode 32-bit unsigned integer using little-endian byte order"
   (decode-uint-le (decode :raw-bytes stream :length 4)))
 
+(defmethod decode ((type (eql :uint32)) stream &key)
+  "Synonym for :uint32-be"
+  (decode :uint32-be stream))
+
 (defmethod decode ((type (eql :uint64-be)) stream &key)
   "Decode 64-bit unsigned integer using big-endian byte order"
   (decode-uint-be (decode :raw-bytes stream :length 8)))
@@ -99,6 +107,10 @@
 (defmethod decode ((type (eql :uint64-le)) stream &key)
   "Decode 64-bit unsigned integer using little-endian byte order"
   (decode-uint-le (decode :raw-bytes stream :length 8)))
+
+(defmethod decode ((type (eql :uint64)) stream &key)
+  "Synonym for :uint64-be"
+  (decode :uint64-be stream))
 
 (defmethod decode ((type (eql :string)) stream &key)
   "Decode a string value from the given binary stream"
