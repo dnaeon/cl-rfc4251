@@ -94,10 +94,12 @@
 
   (testing "decode uint32"
     (let* ((data #(#x00 #x00 #xAB #xCD))
-           (stream-be (make-binary-input-stream data))
-           (stream-le (make-binary-input-stream data)))
-      (ok (= #x0000ABCD (decode :uint32-be stream-be)) "Decode uint32-be")
-      (ok (= #xCDAB0000 (decode :uint32-le stream-le)) "Decode uint32-le")))
+           (stream1 (make-binary-input-stream data))
+           (stream2 (make-binary-input-stream data))
+           (stream3 (make-binary-input-stream #(#x29 #xB7 #xF4 #xAA))))
+      (ok (= #x0000ABCD (decode :uint32-be stream1)) "Decode uint32-be")
+      (ok (= #xCDAB0000 (decode :uint32-le stream2)) "Decode uint32-le")
+      (ok (= #x29B7F4AA (decode :uint32-be stream3)) "Decode value #x29B7F4AA uint32-be")))
 
   (testing "decode uint64"
     (let* ((data #(#x00 #x00 #x00 #x00 #x00 #x00 #xAB #xCD))
