@@ -119,9 +119,13 @@
           (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x02 #x00 #x80)))
           (stream3 (make-binary-input-stream #(#x00 #x00 #x00 #x02 #xED #xCC)))
           (stream4 (make-binary-input-stream #(#x00 #x00 #x00 #x05 #xFF #x21 #x52 #x41 #x11)))
-          (stream5 (make-binary-input-stream #(#x00 #x00 #x00 #x08 #x09 #xA3 #x78 #xF9 #xB2 #xE3 #x32 #xA7))))
+          (stream5 (make-binary-input-stream #(#x00 #x00 #x00 #x08 #x09 #xA3 #x78 #xF9 #xB2 #xE3 #x32 #xA7)))
+          (stream6 (make-binary-input-stream #(#x00 #x00 #x00 #x04))) ;; Missing data partition
+          (stream7 (make-binary-input-stream #(#x00 #x00 #x00 #x04 #x01 #x02)))) ;; Incomplete data partition
       (ok (= #x00 (decode :mpint stream1)) "Decode mpint 0 value")
       (ok (= #x80 (decode :mpint stream2)) "Decode mpint #x80 value")
       (ok (= #x-1234 (decode :mpint stream3)) "Decode mpint #x-1234 value")
       (ok (= #x-DEADBEEF (decode :mpint stream4)) "Decode mpint #x-DEADBEEF value")
-      (ok (= #x9A378F9B2E332A7 (decode :mpint stream5)) "Decode mpint #x9A378F9B2E332A7 value"))))
+      (ok (= #x9A378F9B2E332A7 (decode :mpint stream5)) "Decode mpint #x9A378F9B2E332A7 value")
+      (ok (signals (decode :mpint stream6)) "Missing data partition")
+      (ok (signals (decode :mpint stream7)) "Incomplete data partition"))))
