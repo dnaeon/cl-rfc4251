@@ -28,15 +28,13 @@
   (:use :cl :rove)
   (:nicknames :rfc4251.test)
   (:import-from
-   :cl-rfc4251.stream
+   :cl-rfc4251
+   :decode
    :binary-input-stream
    :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
-   :make-binary-input-stream)
-  (:import-from
-   :cl-rfc4251.binary
-   :decode))
+   :make-binary-input-stream))
 (in-package :cl-rfc4251.test)
 
 (defparameter *binary-input-stream-data*
