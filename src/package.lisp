@@ -26,5 +26,25 @@
 (in-package :cl-user)
 (defpackage :cl-rfc4251
   (:use :cl)
-  (:nicknames :rfc4251))
+  (:nicknames :rfc4251)
+  (:import-from
+   :cl-rfc4251.binary
+   :decode)
+  (:import-from
+   :cl-rfc4251.stream
+   :binary-input-stream
+   :binary-input-stream-data
+   :binary-input-stream-index
+   :binary-input-stream-end
+   :make-binary-input-stream)
+  (:export
+   ;; binary
+   :decode
+
+   ;; stream
+   :binary-input-stream
+   :binary-input-stream-data
+   :binary-input-stream-index
+   :binary-input-stream-end
+   :make-binary-input-stream))
 (in-package :cl-rfc4251)
