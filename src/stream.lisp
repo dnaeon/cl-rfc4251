@@ -1,7 +1,7 @@
 (in-package :cl-user)
-(defpackage :cl-openssh-cert.stream
+(defpackage :cl-rfc4251.stream
   (:use :cl)
-  (:nicknames :openssh-cert.stream :ssh-cert.stream)
+  (:nicknames :rfc4251.stream)
   (:import-from
    :trivial-gray-streams
    :fundamental-binary-input-stream
@@ -14,7 +14,7 @@
    :binary-input-stream-index
    :binary-input-stream-end
    :make-binary-input-stream))
-(in-package :cl-openssh-cert.stream)
+(in-package :cl-rfc4251.stream)
 
 (defclass binary-input-stream (fundamental-binary-input-stream)
   ((data

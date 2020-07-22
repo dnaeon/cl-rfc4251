@@ -1,5 +1,5 @@
 (in-package :cl-user)
-(defpackage :cl-openssh-cert
+(defpackage :cl-rfc4251
   (:use :cl)
-  (:nicknames :openssh-cert :ssh-cert))
-(in-package :cl-openssh-cert)
+  (:nicknames :rfc4251))
+(in-package :cl-rfc4251)

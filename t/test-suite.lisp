@@ -1,18 +1,18 @@
 (in-package :cl-user)
-(defpackage :cl-openssh-cert.test
+(defpackage :cl-rfc4251.test
   (:use :cl :rove)
-  (:nicknames :openssh-cert.test :ssh-cert.test)
+  (:nicknames :rfc4251.test)
   (:import-from
-   :openssh-cert.stream
+   :cl-rfc4251.stream
    :binary-input-stream
    :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
    :make-binary-input-stream)
   (:import-from
-   :openssh-cert.binary
+   :cl-rfc4251.binary
    :decode))
-(in-package :cl-openssh-cert.test)
+(in-package :cl-rfc4251.test)
 
 (defparameter *binary-input-stream-data*
   #(1 2 3 4 5 6 7 8 9 10)

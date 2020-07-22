@@ -1,13 +1,13 @@
 (in-package :cl-user)
-(defpackage :cl-openssh-cert.binary
+(defpackage :cl-rfc4251.binary
   (:use :cl)
-  (:nicknames :openssh-cert.binary :ssh-cert.binary)
+  (:nicknames :rfc4251.binary)
   (:export
    :decode
    :decode-uint-be
    :decode-uint-le
    :decode-mpint-be))
-(in-package :cl-openssh-cert.binary)
+(in-package :cl-rfc4251.binary)
 
 (defun decode-uint-be (bytes)
   "Decode a vector of bytes into an unsigned integer, using big-endian byte order"
