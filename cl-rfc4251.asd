@@ -20,8 +20,7 @@
   :components ((:module "core"
                 :pathname #P"src/"
                 :components ((:file "binary")
-                             (:file "stream")
-                             (:file "core" :depends-on ("binary"))))
+                             (:file "stream")))
                (:module "client-package"
                 :pathname #P"src/"
                 :depends-on ("core")
