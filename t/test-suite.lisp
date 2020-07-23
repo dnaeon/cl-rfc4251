@@ -161,4 +161,12 @@
       (ok (= #x-DEADBEEF (decode :mpint stream4)) "Decode mpint #x-DEADBEEF value")
       (ok (= #x9A378F9B2E332A7 (decode :mpint stream5)) "Decode mpint #x9A378F9B2E332A7 value")
       (ok (signals (decode :mpint stream6)) "Missing data partition")
-      (ok (signals (decode :mpint stream7)) "Incomplete data partition"))))
+      (ok (signals (decode :mpint stream7)) "Incomplete data partition")))
+
+  (testing "decode name-list"
+    (let ((stream1 (make-binary-input-stream #(#x00 #x00 #x00 #x00)))
+          (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x04 #x7A #x6C #x69 #x62)))
+          (stream3 (make-binary-input-stream #(#x00 #x00 #x00 #x09 #x7A #x6C #x69 #x62 #x2C #x6E #x6F #x6E #x65))))
+      (ok (null (decode :name-list stream1)) "Decode empty :name-list")
+      (ok (equal (list "zlib") (decode :name-list stream2)) "Decode :name-list (zlib)")
+      (ok (equal (list "zlib" "none") (decode :name-list stream3)) "Decode :name-list (zlib none)"))))
