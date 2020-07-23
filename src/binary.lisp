@@ -27,6 +27,9 @@
 (defpackage :cl-rfc4251.binary
   (:use :cl)
   (:nicknames :rfc4251.binary)
+  (:import-from
+   :uiop
+   :split-string)
   (:export
    :decode
    :decode-uint-be
@@ -130,3 +133,8 @@
     (loop repeat length
           do (vector-push (read-byte stream) bytes))
     (decode-twos-complement bytes)))
+
+(defmethod decode ((type (eql :name-list)) stream &key)
+  "Decode a comma-separated list of names from the given binary stream"
+  (let ((value (decode :string stream)))
+    (split-string value :separator (list #\Comma))))

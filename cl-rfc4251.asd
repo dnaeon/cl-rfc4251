@@ -15,7 +15,8 @@
   :homepage "https://github.com/dnaeon/cl-rfc4251"
   :bug-tracker "https://github.com/dnaeon/cl-rfc4251"
   :source-control "https://github.com/dnaeon/cl-rfc4251"
-  :depends-on (:trivial-gray-streams)
+  :depends-on (:trivial-gray-streams
+               :uiop)
   :components ((:module "core"
                 :pathname #P"src/"
                 :components ((:file "binary")
