@@ -57,7 +57,9 @@
     (+ (- (logand c mask)) (logand c (lognot mask)))))
 
 (defgeneric decode (type stream &key)
-  (:documentation "Decode a value with the given type and stream" ))
+  (:documentation "Decode a value with the given type from the binary
+stream. Returns multiple values -- the decoded value and the number of
+bytes that were actually read to produce the value."))
 
 (defmethod decode ((type (eql :raw-bytes)) stream &key (length 1) (eof-error-p t) eof-value)
   "Read up to the given length of raw bytes from the stream"
