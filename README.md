@@ -70,25 +70,44 @@ stream. You can also use the `RFC4251:MAKE-BINARY-INPUT-STREAM`
 function to create a binary stream, which uses a vector for the
 underlying data.
 
+`RFC4251:DECODE` returns multiple values -- the actual decoded value,
+and the number of bytes that were read from the binary stream in order
+to produce the value.
+
 Decode raw bytes with a given length from the binary stream `s`.
 
 ``` common-lisp
-CL-USER> (rfc4251:decode :raw-bytes s :length 2)
+CL-USER> (rfc4251:decode :raw-bytes s :length 4)
+#(0 0 0 8)
+4
 ```
 
-Decode a 16-bit unsigned integer represented in big-endian byte order
-from a given binary stream `s`.
+The second value in above example indicates the actual bytes that were
+read from the binary stream.
+
+This example decodes a 16-bit unsigned integer represented in
+big-endian byte order from a given binary stream `s`.
 
 ``` common-lisp
-CL-USER> (rfc4251:decode :uint16 s)
+CL-USER> (let ((s (rfc4251:make-binary-input-stream #(0 #x80))))
+           (rfc4251:decode :uint16 s))
+128
+2
 ```
 
-Decode a multiple precision integer represented in two's complement
-format from the binary stream `s`.
+The following example decodes a multiple precision integer represented
+in two's complement format from the binary stream `s`.
 
 ``` common-lisp
-CL-USER> (rfc4251:decode :mpint s)
+CL-USER> (let ((s (rfc4251:make-binary-input-stream #(#x00 #x00 #x00 #x05 #xFF #x21 #x52 #x41 #x11))))
+           (rfc4251:decode :mpint s))
+-3735928559
+9
 ```
+
+The second value in the example above, which specifies the number of
+bytes being read is `9`, because we had to read one `uint32` value
+(the header) and additional `5` bytes (the value partition).
 
 For additional examples, make sure to check the [test
 suite](./t/test-suite.lisp).
