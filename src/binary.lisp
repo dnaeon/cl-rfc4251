@@ -154,7 +154,7 @@ bytes that were actually read to produce the value."))
          (length (decode :uint32-be stream))
          (bytes (make-array length :fill-pointer 0)))
     (when (zerop length)
-      (return-from decode 0))
+      (return-from decode (values 0 size)))
     (loop repeat length
           do (vector-push (read-byte stream) bytes))
     (values
