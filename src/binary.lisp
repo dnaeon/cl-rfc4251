@@ -64,30 +64,37 @@ bytes that were actually read to produce the value."))
 (defmethod decode ((type (eql :raw-bytes)) stream &key (length 1) (eof-error-p t) eof-value)
   "Read up to the given length of raw bytes from the stream"
   (assert (plusp length) (length))
-  (let ((result (make-array length
-                            :fill-pointer 0)))
+  (let ((result (make-array length :fill-pointer 0))
+        (size length))
     (loop repeat length do
       (vector-push (read-byte stream eof-error-p eof-value) result))
-    result))
+    (values result size)))
 
 (defmethod decode ((type (eql :byte)) stream &key (eof-error-p t) eof-value)
   "Decode a single byte (octet) from the given binary stream"
-  (read-byte stream eof-error-p eof-value))
+  (let ((size 1))
+    (values (read-byte stream eof-error-p eof-value) size)))
 
 (defmethod decode ((type (eql :boolean)) stream &key)
   "Decode a boolean value from the given binary stream"
-  (let* ((value (read-byte stream)))
-    (if (zerop value)
-        nil
-        t)))
+  (let* ((size 1)
+         (byte (read-byte stream))
+         (result (if (zerop byte) nil t)))
+    (values result size)))
 
 (defmethod decode ((type (eql :uint16-be)) stream &key)
   "Decode 16-bit unsigned integer using big-endian byte order"
-  (decode-uint-be (decode :raw-bytes stream :length 2)))
+  (let ((size 2))
+    (values
+     (decode-uint-be (decode :raw-bytes stream :length size))
+     size)))
 
 (defmethod decode ((type (eql :uint16-le)) stream &key)
   "Decode 16-bit unsigned integer using little-endian byte order"
-  (decode-uint-le (decode :raw-bytes stream :length 2)))
+  (let ((size 2))
+    (values
+     (decode-uint-le (decode :raw-bytes stream :length size))
+     size)))
 
 (defmethod decode ((type (eql :uint16)) stream &key)
   "Synonym for :uint16-be"
@@ -95,11 +102,17 @@ bytes that were actually read to produce the value."))
 
 (defmethod decode ((type (eql :uint32-be)) stream &key)
   "Decode 32-bit unsigned integer using big-endian byte order"
-  (decode-uint-be (decode :raw-bytes stream :length 4)))
+  (let ((size 4))
+    (values
+     (decode-uint-be (decode :raw-bytes stream :length size))
+     size)))
 
 (defmethod decode ((type (eql :uint32-le)) stream &key)
   "Decode 32-bit unsigned integer using little-endian byte order"
-  (decode-uint-le (decode :raw-bytes stream :length 4)))
+  (let ((size 4))
+    (values
+     (decode-uint-le (decode :raw-bytes stream :length size))
+     size)))
 
 (defmethod decode ((type (eql :uint32)) stream &key)
   "Synonym for :uint32-be"
@@ -107,11 +120,17 @@ bytes that were actually read to produce the value."))
 
 (defmethod decode ((type (eql :uint64-be)) stream &key)
   "Decode 64-bit unsigned integer using big-endian byte order"
-  (decode-uint-be (decode :raw-bytes stream :length 8)))
+  (let ((size 8))
+    (values
+     (decode-uint-be (decode :raw-bytes stream :length size))
+     size)))
 
 (defmethod decode ((type (eql :uint64-le)) stream &key)
   "Decode 64-bit unsigned integer using little-endian byte order"
-  (decode-uint-le (decode :raw-bytes stream :length 8)))
+  (let ((size 8))
+    (values
+     (decode-uint-le (decode :raw-bytes stream :length size))
+     size)))
 
 (defmethod decode ((type (eql :uint64)) stream &key)
   "Synonym for :uint64-be"
@@ -119,24 +138,32 @@ bytes that were actually read to produce the value."))
 
 (defmethod decode ((type (eql :string)) stream &key)
   "Decode a string value from the given binary stream"
-  (let ((length (decode :uint32-be stream))
+  (let ((size 4) ;; Size of the uint32 number specifying the string length
+        (length (decode :uint32-be stream))
         (result (make-string-output-stream)))
     (loop repeat length
           for char = (code-char (read-byte stream))
           do (write-char char result))
-    (get-output-stream-string result)))
+    (values
+     (get-output-stream-string result)
+     (+ size length))))
 
 (defmethod decode ((type (eql :mpint)) stream &key)
   "Decode a multiple precision integer in two's complement format"
-  (let* ((length (decode :uint32-be stream))
+  (let* ((size 4) ;; Size of the uint32 number specifying the mpint length
+         (length (decode :uint32-be stream))
          (bytes (make-array length :fill-pointer 0)))
     (when (zerop length)
       (return-from decode 0))
     (loop repeat length
           do (vector-push (read-byte stream) bytes))
-    (decode-twos-complement bytes)))
+    (values
+     (decode-twos-complement bytes)
+     (+ size length))))
 
 (defmethod decode ((type (eql :name-list)) stream &key)
   "Decode a comma-separated list of names from the given binary stream"
-  (let ((value (decode :string stream)))
-    (split-string value :separator (list #\Comma))))
+  (multiple-value-bind (value size) (decode :string stream)
+    (values
+     (split-string value :separator (list #\Comma))
+     size)))
