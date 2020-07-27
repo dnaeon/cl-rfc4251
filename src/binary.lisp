@@ -167,3 +167,20 @@ bytes that were actually read to produce the value."))
     (values
      (split-string value :separator (list #\Comma))
      size)))
+
+(defmethod decode ((type (eql :ssh-cert-embedded-string-list)) stream &key)
+  "Decode a list of strings embedded within a string.
+
+The OpenSSH certificate format encodes the list of `valid principals`
+as a list of strings, embedded within a `string` value. Not sure why
+they decided to do it this way, instead of using `name-list` data type
+as defined in RFC 4251, section 5."
+  (let ((header-size 4)
+        (length (decode :uint32 stream))) ;; The number of bytes representing the embedded data
+    (when (zerop length)
+      (return-from decode (values nil header-size)))
+    (loop for (value size) = (multiple-value-list (decode :string stream))
+          summing size into total
+          collect value into result
+          until (>= total length)
+          finally (return (values result (+ header-size length))))))
