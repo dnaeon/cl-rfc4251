@@ -1,20 +1,20 @@
 ## cl-rfc4251
 
 `cl-rfc4251` is a Common Lisp system, which provides support for
-parsing [RFC 4251](https://tools.ietf.org/html/rfc4251) encoded binary
+parsing [RFC 4251][RFC 4251] encoded binary
 data, as described in the [Data Type Representations Used in the SSH
 Protocols](https://tools.ietf.org/html/rfc4251#section-5) section of
 the document.
 
 ## Requirements
 
-* [Quicklisp](https://www.quicklisp.org/beta/)
+* [Quicklisp][Quicklisp]
 
 ## Installation
 
-Clone the [cl-rfc4251](https://github.com/dnaeon/cl-rfc4251) repo in
+Clone the [cl-rfc4251][cl-rfc4251] repo in
 your [Quicklisp local-projects
-directory](https://www.quicklisp.org/beta/faq.html).
+directory][Quicklisp FAQ].
 
 ``` shell
 git clone https://github.com/dnaeon/cl-rfc4251.git
@@ -37,23 +37,25 @@ name and the keywords used to decode a given value in Common Lisp.
 |-------------|-----------------|--------------------------------------------------|
 | `byte`      | `:byte`         | An arbitrary 8-bit value (octet)                 |
 | `boolean`   | `:boolean`      | A boolean value, either `T` or `NIL`             |
-| `uint16`    | `:uint16`       | Unsigned 16-bit integer in big-endian byte order |
 | `uint32`    | `:uint32`       | Unsigned 32-bit integer in big-endian byte order |
 | `uint64`    | `:uint64`       | Unsigned 64-bit integer in big-endian byte order |
 | `string`    | `:string`       | Arbitrary length string                          |
 | `mpint`     | `:mpint`        | Multiple precision integer                       |
 | `name-list` | `:name-list`    | A list of string names                           |
 
-In addition to the above data types, the following ones are also
-supported, which are not directly specified in RFC 4251, but are also
-useful on their own.
+Additional data types supported by the `cl-rfc4251` system, which are
+not directly specified in RFC 4251, but are used by OpenSSH for
+different purposes, e.g. public-key encoding, certificates, etc.
 
-| cl-rfc4251 type | Description                                         |
-|-----------------|-----------------------------------------------------|
-| `:raw-bytes`    | Read a sequence of raw bytes up to a given length   |
-| `:uint16-le`    | Unsigned 16-bit integer in little-endian byte order |
-| `:uint32-le`    | Unsigned 32-bit integer in little-endian byte order |
-| `:uint64-le`    | Unsigned 64-bit integer in little-endian byte order |
+| cl-rfc4251 type                  | Description                                                                                          |
+|----------------------------------|------------------------------------------------------------------------------------------------------|
+| `:raw-bytes`                     | Read a sequence of raw bytes up to a given length                                                    |
+| `:uint16`                        | Synonym for `:uint16-be`                                                                             |
+| `:uint16`                        | Unsigned 16-bit integer in big-endian byte order                                                     |
+| `:uint16-le`                     | Unsigned 16-bit integer in little-endian byte order                                                  |
+| `:uint32-le`                     | Unsigned 32-bit integer in little-endian byte order                                                  |
+| `:uint64-le`                     | Unsigned 64-bit integer in little-endian byte order                                                  |
+| `:ssh-cert-embedded-string-list` | List of strings, embedded within a `:string` value. Used in [OpenSSH Certificates][OpenSSH.certkey]. |
 
 ## Usage
 
@@ -152,3 +154,9 @@ requests.
 
 This project is Open Source and licensed under the [BSD
 License](http://opensource.org/licenses/BSD-2-Clause).
+
+[RFC 4251]: https://tools.ietf.org/html/rfc4251
+[Quicklisp]: https://www.quicklisp.org/beta/
+[Quicklisp FAQ]: https://www.quicklisp.org/beta/faq.html
+[cl-rfc4251]: https://github.com/dnaeon/cl-rfc4251
+[OpenSSH.certkey]: https://cvsweb.openbsd.org/src/usr.bin/ssh/PROTOCOL.certkeys?annotate=HEAD
