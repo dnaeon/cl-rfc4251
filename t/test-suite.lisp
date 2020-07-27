@@ -30,6 +30,7 @@
   (:import-from
    :cl-rfc4251
    :decode
+   :encode
    :binary-input-stream
    :binary-input-stream-data
    :binary-input-stream-index
@@ -103,6 +104,39 @@
       (ok (equalp #(#x00 #x01 #x02 #x03 #x04 #x05 #x06 #x07 #x08 #x09)
                   (binary-output-stream-data stream))
           "Stream data matches with written bytes"))))
+
+(deftest binary-encoder
+  (testing "encode byte"
+    (let ((stream (make-binary-output-stream))
+          (iterations 10))
+      (dotimes (i iterations)
+        (ok (= 1 (encode :byte i stream))
+            (format nil "Encode byte #x~2,'0x" i)))
+      (ok (= iterations (length (binary-output-stream-data stream)))
+          (format nil "Binary output stream size is ~d" iterations))))
+
+  (testing "encode raw-bytes"
+    (let ((stream1 (make-binary-output-stream))
+          (stream2 (make-binary-output-stream))
+          (stream3 (make-binary-output-stream))
+          (data #(#x00 #x01 #x02 #x03 #x04 #x05 #x06 #x07 #x08 #x09)))
+      (ok (= (length data) (encode :raw-bytes data stream1))
+          "Encode raw bytes into stream1")
+      (ok (equalp data (binary-output-stream-data stream1))
+          "Encoded data matches with input data")
+      (ok (= 5 (encode :raw-bytes data stream2 :length 5))
+          "Encode raw-bytes with length 5")
+      (ok (equalp #(#x00 #x01 #x02 #x03 #x04)
+                  (binary-output-stream-data stream2))
+          "Encoded data is a vector of size 5")
+      (ok (signals (encode :raw-bytes data stream2 :length 0))
+          "Signals on encoding with length 0")
+      (ok (signals (encode :raw-bytes data stream2 :length -100))
+          "Signals on encoding with negative length")
+      (ok (= (length data) (encode :raw-bytes data stream3 :length 1000))
+          "Encode raw-bytes with length greater than input data")
+      (ok (equalp data (binary-output-stream-data stream3))
+          "Encoded raw-bytes matches with input data, while using a greater length"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
