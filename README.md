@@ -61,6 +61,7 @@ the `cl-rfc4251.extensions` system.
 | `:uint64-le`                     | Unsigned 64-bit integer in little-endian byte order                                                                   |
 | `:ssh-cert-embedded-string-list` | List of strings, embedded within a `string`. Used in [OpenSSH certificates][OpenSSH.certkey], e.g. `valid principals` |
 | `:ssh-cert-options`              | List of tuples, describing [OpenSSH certificate][OpenSSH.certkey] options, e.g. `critical options` and `extensions`   |
+| `:ssh-cert-nonce`                | Nonce field used in [OpenSSH certificates][OpenSSH.certkey], a CA-provided random bitstring of arbitrary length       |
 
 ## Usage
 
