@@ -34,7 +34,10 @@
    :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
-   :make-binary-input-stream))
+   :make-binary-input-stream
+   :binary-output-stream
+   :binary-output-stream-data
+   :make-binary-output-stream))
 (in-package :cl-rfc4251.test)
 
 (defparameter *binary-input-stream-data*
@@ -86,6 +89,20 @@
         "Out of bounds :end value")
     (ok (signals (make-binary-input-stream *binary-input-stream-data* :start 1000 :end 1000))
         "Invalid :start and :end values")))
+
+(deftest binary-output-stream
+  (testing "write to binary-output-stream"
+    (let ((stream (make-binary-output-stream)))
+      (ok (= 0 (length (binary-output-stream-data stream)))
+          "Stream data size is zero")
+      (dotimes (i 10)
+        (ok (= i (write-byte i stream))
+            (format nil "Write byte ~r into stream" i)))
+      (ok (= 10 (length (binary-output-stream-data stream)))
+          "Stream size is ten")
+      (ok (equalp #(#x00 #x01 #x02 #x03 #x04 #x05 #x06 #x07 #x08 #x09)
+                  (binary-output-stream-data stream))
+          "Stream data matches with written bytes"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
