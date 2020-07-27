@@ -217,4 +217,21 @@
           "Decode :name-list (zlib)")
       (ok (equal (list (list "zlib" "none") 13) ;; Total number of bytes read should 4 (uint32) + 9 (value partition)
                  (multiple-value-list (decode :name-list stream3)))
-          "Decode :name-list (zlib none)"))))
+          "Decode :name-list (zlib none)")))
+
+  (testing "decode ssh-cert-embedded-string-list"
+    (let ((stream1 (make-binary-input-stream #(#x00 #x00 #x00 #x14
+                                               #x00 #x00 #x00 #x04 #x72 #x6F #x6F #x74
+                                               #x00 #x00 #x00 #x08 #x6A #x6F #x68 #x6E #x2E #x64 #x6F #x65)))
+          (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x08
+                                               #x00 #x00 #x00 #x04 #x72 #x6F #x6F #x74)))
+          (stream3 (make-binary-input-stream #(#x00 #x00 #x00 #x00))))
+      (ok (equal (list (list "root" "john.doe") 24) ;; Total number of bytes is 4 (uint32 header) + (4 + length "root") + (4 + length "john.doe")
+                 (multiple-value-list (decode :ssh-cert-embedded-string-list stream1)))
+          "Decode list of multiple embedded string values")
+      (ok (equal (list (list "root") 12) ;; Total number of bytes is 4 (uint32 header) + (4 + length "root")
+                 (multiple-value-list (decode :ssh-cert-embedded-string-list stream2)))
+          "Decode list of single embedded string value")
+      (ok (equal (list nil 4) ;; Total number of bytes is just the uint32 header value
+                 (multiple-value-list (decode :ssh-cert-embedded-string-list stream3)))
+          "Decode empty list of embedded string values"))))
