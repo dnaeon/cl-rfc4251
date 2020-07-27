@@ -36,7 +36,10 @@
    :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
-   :make-binary-input-stream)
+   :make-binary-input-stream
+   :binary-output-stream
+   :binary-output-stream-data
+   :make-binary-output-stream)
   (:export
    ;; binary
    :decode
@@ -46,5 +49,8 @@
    :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
-   :make-binary-input-stream))
+   :make-binary-input-stream
+   :binary-output-stream
+   :binary-output-stream-data
+   :make-binary-output-stream))
 (in-package :cl-rfc4251)

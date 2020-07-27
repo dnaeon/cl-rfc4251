@@ -38,7 +38,10 @@
    :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
-   :make-binary-input-stream))
+   :make-binary-input-stream
+   :binary-output-stream
+   :binary-output-stream-data
+   :make-binary-output-stream))
 (in-package :cl-rfc4251.stream)
 
 (defclass binary-input-stream (fundamental-binary-input-stream)
@@ -78,4 +81,27 @@
 (defmethod print-object ((object binary-input-stream) stream)
   (print-unreadable-object (object stream :type t)
     (with-slots (data index end) object
-        (format stream "size: ~d index: ~d end: ~d" (length data) index end))))
+      (format stream "size: ~d index: ~d end: ~d" (length data) index end))))
+
+(defclass binary-output-stream (fundamental-binary-output-stream)
+  ((data
+    :initarg :data
+    :initform (make-array 0 :element-type '(unsigned-byte 8) :adjustable t :fill-pointer 0)
+    :accessor binary-output-stream-data
+    :documentation "The underlying vector to which data is written"))
+  (:documentation "Binary output stream class using a vector for the underlying data"))
+
+(defmethod stream-write-byte ((stream binary-output-stream) value)
+  "Writes a byte to the given binary stream"
+  (with-slots (data) stream
+    (vector-push-extend value data))
+  value)
+
+(defmethod print-object ((object binary-output-stream) stream)
+  (print-unreadable-object (object stream :type t)
+    (with-slots (data) object
+      (format stream "size: ~d" (length data)))))
+
+(defun make-binary-output-stream ()
+  "Creates a new instance of BINARY-OUTPUT-STREAM"
+  (make-instance 'binary-output-stream))
