@@ -15,10 +15,16 @@
   :homepage "https://github.com/dnaeon/cl-rfc4251"
   :bug-tracker "https://github.com/dnaeon/cl-rfc4251"
   :source-control "https://github.com/dnaeon/cl-rfc4251"
-  :depends-on (:cl-rfc4251)
+  :depends-on (:cl-rfc4251
+               :alexandria
+               :binascii
+               :uiop
+               :ironclad)
   :components ((:module "extensions"
                 :pathname #P"src/extensions/"
+                :serial t
                 :components ((:file "package")
-                             (:file "integer" :depends-on ("package"))
-                             (:file "ssh-cert" :depends-on ("package")))))
+                             (:file "integer")
+                             (:file "ssh-cert")
+                             (:file "ssh-public-key"))))
   :in-order-to ((test-op (test-op "cl-rfc4251.test"))))

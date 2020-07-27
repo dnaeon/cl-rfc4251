@@ -25,6 +25,11 @@
 
 (in-package :cl-rfc4251.extensions)
 
+(alexandria:define-constant +ssh-rsa-key-kind+
+  "ssh-rsa"
+  :test #'string=
+  :documentation "The key type for an SSH RSA key")
+
 (defclass ssh-public-key ()
   ((kind
     :initarg :kind
@@ -73,3 +78,19 @@ preceeding the actual RSA public key components."
          (pk (first pk-data))
          (pk-size (second pk-data)))
     (values pk (+ kind-size pk-size))))
+
+(defun ssh-key-file-parts (path)
+  "Returns the parts of an OpenSSH public key file"
+  (with-open-file (in path)
+    (uiop:split-string (read-line in) :separator '(#\Space))))
+
+(defun parse-ssh-public-key-file (path)
+  "Parses an OpenSSH public key file from the given path"
+  (let* ((parts (ssh-key-file-parts path))
+         (kind (first parts))
+         (data (second parts))
+         (comment (third parts))
+         (stream (make-binary-input-stream (binascii:decode-base64 data))))
+    (alexandria:switch (kind :test #'equal)
+      (+ssh-rsa-key-kind+ (decode :ssh-rsa-public-key stream :comment comment))
+      (t (error "Unknown public key kind ~a" kind)))))
