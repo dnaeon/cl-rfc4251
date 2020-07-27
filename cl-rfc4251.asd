@@ -5,7 +5,7 @@
 (defsystem "cl-rfc4251"
   :name "cl-rfc4251"
   :long-name "cl-rfc4251"
-  :description "Common Lisp library for parsing RFC 4251 encoded binary data"
+  :description "Common Lisp library for encoding and decoding data in RFC 4251 compliant format"
   :version "0.1.0"
   :author "Marin Atanasov Nikolov <dnaeon@gmail.com>"
   :maintainer "Marin Atanasov Nikolov <dnaeon@gmail.com>"
@@ -19,7 +19,8 @@
                :uiop)
   :components ((:module "core"
                 :pathname #P"src/"
-                :components ((:file "binary")
+                :components ((:file "decoder")
+                             (:file "encoder")
                              (:file "stream")))
                (:module "client-package"
                 :pathname #P"src/"

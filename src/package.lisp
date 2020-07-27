@@ -28,8 +28,11 @@
   (:use :cl)
   (:nicknames :rfc4251)
   (:import-from
-   :cl-rfc4251.binary
+   :cl-rfc4251.decoder
    :decode)
+  (:import-from
+   :cl-rfc4251.encoder
+   :encode)
   (:import-from
    :cl-rfc4251.stream
    :binary-input-stream
@@ -41,7 +44,10 @@
    :binary-output-stream-data
    :make-binary-output-stream)
   (:export
-   ;; binary
+   ;; encoder
+   :encode
+
+   ;; decoder
    :decode
 
    ;; stream

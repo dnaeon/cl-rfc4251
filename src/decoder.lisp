@@ -24,9 +24,9 @@
 ;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (in-package :cl-user)
-(defpackage :cl-rfc4251.binary
+(defpackage :cl-rfc4251.decoder
   (:use :cl)
-  (:nicknames :rfc4251.binary)
+  (:nicknames :rfc4251.decoder)
   (:import-from
    :uiop
    :split-string)
@@ -35,7 +35,7 @@
    :decode-uint-be
    :decode-uint-le
    :decode-mpint-be))
-(in-package :cl-rfc4251.binary)
+(in-package :cl-rfc4251.decoder)
 
 (defun decode-uint-be (bytes)
   "Decode a vector of bytes into an unsigned integer, using big-endian byte order"

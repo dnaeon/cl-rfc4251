@@ -5,7 +5,7 @@
   (:import-from
    :ironclad)
   (:import-from
-   :cl-rfc4251.binary
+   :cl-rfc4251.decoder
    :decode
    :decode-uint-be
    :decode-uint-le)
