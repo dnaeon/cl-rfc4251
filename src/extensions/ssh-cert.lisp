@@ -41,3 +41,22 @@ as defined in RFC 4251, section 5."
           collect value into result
           until (>= total length)
           finally (return (values result (+ header-size length))))))
+
+(defmethod decode ((type (eql :ssh-cert-options)) stream &key)
+  "Decode a list of OpenSSH certificate options.
+
+Options are either `critical options`, or `extentions` as
+defined in [1].
+
+[1]: https://cvsweb.openbsd.org/src/usr.bin/ssh/PROTOCOL.certkeys?annotate=HEAD"
+  (let ((header-size 4)
+        (length (decode :uint32 stream))) ;; The number of bytes representing the options data
+    (when (zerop length)
+      (return-from decode (values nil header-size)))
+    (loop for (name name-size) = (multiple-value-list (decode :string stream))
+          for (data data-size) = (multiple-value-list (decode :ssh-cert-embedded-string-list stream))
+          summing name-size into total
+          summing data-size into total
+          collect (cons name data) into result
+          until (>= total length)
+          finally (return (values result (+ header-size length))))))
