@@ -234,4 +234,50 @@
           "Decode list of single embedded string value")
       (ok (equal (list nil 4) ;; Total number of bytes is just the uint32 header value
                  (multiple-value-list (decode :ssh-cert-embedded-string-list stream3)))
-          "Decode empty list of embedded string values"))))
+          "Decode empty list of embedded string values")))
+
+  (testing "decode ssh-cert-options"
+    (let ((stream1 (make-binary-input-stream #(#x00 #x00 #x00 #x4C #x00 #x00 #x00 #x0E
+                                               #x73 #x6F #x75 #x72 #x63 #x65 #x2D #x61
+                                               #x64 #x64 #x72 #x65 #x73 #x73 #x00 #x00
+                                               #x00 #x10 #x00 #x00 #x00 #x0C #x31 #x32
+                                               #x37 #x2E #x30 #x2E #x30 #x2E #x31 #x2F
+                                               #x33 #x32 #x00 #x00 #x00 #x0D #x66 #x6F
+                                               #x72 #x63 #x65 #x2D #x63 #x6F #x6D #x6D
+                                               #x61 #x6E #x64 #x00 #x00 #x00 #x11 #x00
+                                               #x00 #x00 #x0D #x2F #x75 #x73 #x72 #x2F
+                                               #x62 #x69 #x6E #x2F #x74 #x72 #x75 #x65)))
+          (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x82 #x00 #x00 #x00 #x15
+                                               #x70 #x65 #x72 #x6D #x69 #x74 #x2D #x58
+                                               #x31 #x31 #x2D #x66 #x6F #x72 #x77 #x61
+                                               #x72 #x64 #x69 #x6E #x67 #x00 #x00 #x00
+                                               #x00 #x00 #x00 #x00 #x17 #x70 #x65 #x72
+                                               #x6D #x69 #x74 #x2D #x61 #x67 #x65 #x6E
+                                               #x74 #x2D #x66 #x6F #x72 #x77 #x61 #x72
+                                               #x64 #x69 #x6E #x67 #x00 #x00 #x00 #x00
+                                               #x00 #x00 #x00 #x16 #x70 #x65 #x72 #x6D
+                                               #x69 #x74 #x2D #x70 #x6F #x72 #x74 #x2D
+                                               #x66 #x6F #x72 #x77 #x61 #x72 #x64 #x69
+                                               #x6E #x67 #x00 #x00 #x00 #x00 #x00 #x00
+                                               #x00 #x0A #x70 #x65 #x72 #x6D #x69 #x74
+                                               #x2D #x70 #x74 #x79 #x00 #x00 #x00 #x00
+                                               #x00 #x00 #x00 #x0E #x70 #x65 #x72 #x6D
+                                               #x69 #x74 #x2D #x75 #x73 #x65 #x72 #x2D
+                                               #x72 #x63 #x00 #x00 #x00 #x00)))
+          (stream3 (make-binary-input-stream #(#x00 #x00 #x00 #x00))))
+      (ok (equal (list '(("source-address" "127.0.0.1/32")
+                         ("force-command" "/usr/bin/true"))
+                       80) ;; Total number of bytes that were read to produce the options
+                 (multiple-value-list (decode :ssh-cert-options stream1)))
+          "Decode OpenSSH certificate critical options")
+      (ok (equal (list '(("permit-X11-forwarding")
+                         ("permit-agent-forwarding")
+                         ("permit-port-forwarding")
+                         ("permit-pty")
+                         ("permit-user-rc"))
+                       134) ;; Total number of bytes that were read to produce the extensions
+                 (multiple-value-list (decode :ssh-cert-options stream2)))
+          "Decode OpenSSH certificate optional extensions")
+      (ok (equal (list nil 4)
+                 (multiple-value-list (decode :ssh-cert-options stream3)))
+          "Decode empty OpenSSH certificate options"))))
