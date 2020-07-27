@@ -25,6 +25,19 @@
 
 (in-package :cl-rfc4251.extensions)
 
+(defmethod decode ((type (eql :ssh-cert-nonce)) stream &key)
+  "Decode the nonce field of an OpenSSH certificate.
+The nonce field is a CA-provided random bitstring of arbitrary length
+[but typically 16 or 32] bytes included to make attacks that depend on
+inducing collisions in the signature hash infeasible."
+  (let* ((header-size 4)
+         (length (decode :uint32 stream)))
+    (when (zerop length)
+      (error "Zero length nonce"))
+    (values
+     (decode :raw-bytes stream :length length)
+     (+ header-size length))))
+
 (defmethod decode ((type (eql :ssh-cert-embedded-string-list)) stream &key)
   "Decode a list of strings embedded within a string.
 
