@@ -280,4 +280,21 @@
           "Decode OpenSSH certificate optional extensions")
       (ok (equal (list nil 4)
                  (multiple-value-list (decode :ssh-cert-options stream3)))
-          "Decode empty OpenSSH certificate options"))))
+          "Decode empty OpenSSH certificate options")))
+
+  (testing "decode ssh-cert-nonce"
+    (let ((stream1 (make-binary-input-stream #(#x00 #x00 #x00 #x20
+                                               #x0E #xDF #xFF #x9B #x0C #x95 #x80 #xD0
+                                               #x5B #x10 #x9C #x4F #x62 #xEE #xC8 #x5E
+                                               #xCE #x65 #xA1 #x1C #xEB #x68 #x5E #x51
+                                               #xE2 #x6C #x49 #x3C #x13 #xE8 #x15 #x29)))
+          (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x00))))
+      (ok (equalp (list #(#x0E #xDF #xFF #x9B #x0C #x95 #x80 #xD0
+                          #x5B #x10 #x9C #x4F #x62 #xEE #xC8 #x5E
+                          #xCE #x65 #xA1 #x1C #xEB #x68 #x5E #x51
+                          #xE2 #x6C #x49 #x3C #x13 #xE8 #x15 #x29)
+                        36) ;; Total number of bytes read is 4 (uint32 header) + (length nonce)
+                 (multiple-value-list (decode :ssh-cert-nonce stream1)))
+          "Decode OpenSSH cert nonce")
+      (ok (signals (decode :ssh-cert-nonce stream2))
+          "Decode invalid zero-length nonce"))))
