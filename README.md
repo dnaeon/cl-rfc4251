@@ -33,29 +33,34 @@ decoded by the `cl-rfc4251` system. The `RFC 4251` and `cl-rfc4251
 type` columns specify the mapping between the RFC defined data type
 name and the keywords used to decode a given value in Common Lisp.
 
-| RFC 4251    | cl-rfc4251 type | Description                                      |
-|-------------|-----------------|--------------------------------------------------|
-| `byte`      | `:byte`         | An arbitrary 8-bit value (octet)                 |
-| `boolean`   | `:boolean`      | A boolean value, either `T` or `NIL`             |
-| `uint32`    | `:uint32`       | Unsigned 32-bit integer in big-endian byte order |
-| `uint64`    | `:uint64`       | Unsigned 64-bit integer in big-endian byte order |
-| `string`    | `:string`       | Arbitrary length string                          |
-| `mpint`     | `:mpint`        | Multiple precision integer                       |
-| `name-list` | `:name-list`    | A list of string names                           |
+| RFC 4251    | cl-rfc4251 type | Description                                       |
+|-------------|-----------------|---------------------------------------------------|
+| `byte`      | `:byte`         | An arbitrary 8-bit value (octet)                  |
+| `byte[n]`   | `:raw-bytes`    | Read a sequence of raw bytes up to a given length |
+| `boolean`   | `:boolean`      | A boolean value, either `T` or `NIL`              |
+| `uint32`    | `:uint32`       | Unsigned 32-bit integer in big-endian byte order  |
+| `uint64`    | `:uint64`       | Unsigned 64-bit integer in big-endian byte order  |
+| `string`    | `:string`       | Arbitrary length string                           |
+| `mpint`     | `:mpint`        | Multiple precision integer                        |
+| `name-list` | `:name-list`    | A list of string names                            |
 
-Additional data types supported by the `cl-rfc4251` system, which are
-not directly specified in RFC 4251, but are used by OpenSSH for
-different purposes, e.g. public-key encoding, certificates, etc.
+## Extensions
 
-| cl-rfc4251 type                  | Description                                                                                          |
-|----------------------------------|------------------------------------------------------------------------------------------------------|
-| `:raw-bytes`                     | Read a sequence of raw bytes up to a given length                                                    |
-| `:uint16`                        | Synonym for `:uint16-be`                                                                             |
-| `:uint16`                        | Unsigned 16-bit integer in big-endian byte order                                                     |
-| `:uint16-le`                     | Unsigned 16-bit integer in little-endian byte order                                                  |
-| `:uint32-le`                     | Unsigned 32-bit integer in little-endian byte order                                                  |
-| `:uint64-le`                     | Unsigned 64-bit integer in little-endian byte order                                                  |
-| `:ssh-cert-embedded-string-list` | List of strings, embedded within a `:string` value. Used in [OpenSSH Certificates][OpenSSH.certkey]. |
+Decoding of additional data types, which are not covered in [RFC
+4251][RFC 4251] is provided by the `cl-rfc4251.extensions` system.
+
+The following table summarizes the additional data types provided by
+the `cl-rfc4251.extensions` system.
+
+| cl-rfc4251 type                  | Description                                                                                                           |
+|----------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| `:uint16`                        | Synonym for `:uint16-be`                                                                                              |
+| `:uint16-be`                     | Unsigned 16-bit integer in big-endian byte order                                                                      |
+| `:uint16-le`                     | Unsigned 16-bit integer in little-endian byte order                                                                   |
+| `:uint32-le`                     | Unsigned 32-bit integer in little-endian byte order                                                                   |
+| `:uint64-le`                     | Unsigned 64-bit integer in little-endian byte order                                                                   |
+| `:ssh-cert-embedded-string-list` | List of strings, embedded within a `string`. Used in [OpenSSH certificates][OpenSSH.certkey], e.g. `valid principals` |
+| `:ssh-cert-options`              | List of tuples, describing [OpenSSH certificate][OpenSSH.certkey] options, e.g. `critical options` and `extensions`   |
 
 ## Usage
 

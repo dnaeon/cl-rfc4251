@@ -17,7 +17,8 @@
   :source-control "https://github.com/dnaeon/cl-rfc4251"
   :depends-on (:cl-rfc4251)
   :components ((:module "extensions"
-                :pathname #P"src/extensions"
-                :components ((:file "integer")
-                             (:file "ssh-cert"))))
+                :pathname #P"src/extensions/"
+                :components ((:file "package")
+                             (:file "integer" :depends-on ("package"))
+                             (:file "ssh-cert" :depends-on ("package")))))
   :in-order-to ((test-op (test-op "cl-rfc4251.test"))))
