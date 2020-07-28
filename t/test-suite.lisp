@@ -136,7 +136,17 @@
       (ok (= (length data) (encode :raw-bytes data stream3 :length 1000))
           "Encode raw-bytes with length greater than input data")
       (ok (equalp data (binary-output-stream-data stream3))
-          "Encoded raw-bytes matches with input data, while using a greater length"))))
+          "Encoded raw-bytes matches with input data, while using a greater length")))
+
+  (testing "encode boolean"
+    (let ((stream (make-binary-output-stream)))
+      (ok (= 1 (encode :boolean t stream))
+          "Encode T as boolean")
+      (ok (= 1 (encode :boolean nil stream))
+          "Encode NIL as boolean")
+      (ok (equalp #(#x01 #x00)
+                  (binary-output-stream-data stream))
+          "Encoded boolean values match with expected data"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
