@@ -85,6 +85,10 @@ Returns the number of bytes that were written to the stream."))
   (declare ((unsigned-byte 16) value))
   (encode :raw-bytes (uint-to-octets-le value :min-size 2) stream))
 
+(defmethod encode ((type (eql :uint16)) value stream &key)
+  "Synonym for :uint16-be"
+  (encode :uint16-be value stream))
+
 (defmethod encode ((type (eql :uint32-be)) value stream &key)
   "Encode an unsigned 32-bit integer in big-endian byte order"
   (declare ((unsigned-byte 32) value))
@@ -95,6 +99,10 @@ Returns the number of bytes that were written to the stream."))
   (declare ((unsigned-byte 32) value))
   (encode :raw-bytes (uint-to-octets-le value :min-size 4) stream))
 
+(defmethod encode ((type (eql :uint32)) value stream &key)
+  "Synonym for :uint32-be"
+  (encode :uint32-be value stream))
+
 (defmethod encode ((type (eql :uint64-be)) value stream &key)
   "Encode an unsigned 64-bit integer in big-endian byte order"
   (declare ((unsigned-byte 64) value))
@@ -104,3 +112,7 @@ Returns the number of bytes that were written to the stream."))
   "Encode an unsigned 64-bit integer in little-endian byte order"
   (declare ((unsigned-byte 64) value))
   (encode :raw-bytes (uint-to-octets-le value :min-size 8) stream))
+
+(defmethod encode ((type (eql :uint64)) value stream &key)
+  "Synonym for :uint64-be"
+  (encode :uint64-be value stream))
