@@ -201,7 +201,21 @@
                   (binary-output-stream-data stream2))
           "Encode #x000000000000ABCD :uint64-le -- expect data to be #(#xCD #xAB #x00 #x00 #x00 #x00 #x00 #x00)")
       (ok (signals (encode :uint64-be #xCDAB00000000000000 stream1))
-          "Expect to signal when using larger than 64-bit value"))))
+          "Expect to signal when using larger than 64-bit value")))
+
+  (testing "encode string"
+    (let ((stream1 (make-binary-output-stream))
+          (stream2 (make-binary-output-stream)))
+      (ok (= 11 (encode :string "testing" stream1))
+          "Encode non-empty string value")
+      (ok (equalp #(#x00 #x00 #x00 #x07 #x74 #x65 #x73 #x74 #x69 #x6E #x67)
+                  (binary-output-stream-data stream1))
+          "Encoded non-empty string data matches")
+      (ok (= 4 (encode :string "" stream2))
+          "Encode empty string value")
+      (ok (equalp #(#x00 #x00 #x00 #x00)
+                  (binary-output-stream-data stream2))
+          "Encoded empty string data matches"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
