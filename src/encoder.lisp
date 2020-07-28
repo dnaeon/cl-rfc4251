@@ -28,8 +28,30 @@
   (:use :cl)
   (:nicknames :rfc4251.encoder)
   (:export
-   :encode))
+   :encode
+   :uint-to-octets-be
+   :uint-to-octets-le))
 (in-package :cl-rfc4251.encoder)
+
+(defun uint-to-octets-be (value &key (min-size 1))
+  "Convert an integer value to a vector of bytes in big-endian byte order.
+The resulting vector will contain at least MIN-SIZE bytes."
+  (assert (plusp min-size) (min-size))
+  (let* ((value-size-in-bytes (ceiling (/ (integer-length value) 8)))
+         (vector-size (max min-size value-size-in-bytes))
+         (result (make-array vector-size
+                             :element-type '(unsigned-byte 8)
+                             :initial-element 0)))
+    (loop for byte-offset from 0 below value-size-in-bytes
+          for vector-index from (1- vector-size) downto 0 do
+            (setf (elt result vector-index)
+                  (ldb (byte 8 (* 8 byte-offset)) value)))
+    result))
+
+(defun uint-to-octets-le (value &key (min-size 1))
+  "Convert an integer value to a vector of bytes in little-endian byte order.
+The resulting vector will contain at least MIN-SIZE bytes"
+  (reverse (uint-to-octets-be value :min-size min-size)))
 
 (defgeneric encode (type value stream &key)
   (:documentation "Encodes the value of the given type into the binary stream.
@@ -50,7 +72,35 @@ Returns the number of bytes that were written to the stream."))
         finally (return i)))
 
 (defmethod encode ((type (eql :boolean)) value stream &key)
-  (let ((size 1)
-        (byte (if value #x01 #x00)))
-    (write-byte byte stream)
-    size))
+  (let ((byte (if value #x01 #x00)))
+    (encode :byte byte stream)))
+
+(defmethod encode ((type (eql :uint16-be)) value stream &key)
+  "Encode an unsigned 16-bit integer in big-endian byte order"
+  (declare ((unsigned-byte 16) value))
+  (encode :raw-bytes (uint-to-octets-be value :min-size 2) stream))
+
+(defmethod encode ((type (eql :uint16-le)) value stream &key)
+  "Encode an unsigned 16-bit integer in little-endian byte order"
+  (declare ((unsigned-byte 16) value))
+  (encode :raw-bytes (uint-to-octets-le value :min-size 2) stream))
+
+(defmethod encode ((type (eql :uint32-be)) value stream &key)
+  "Encode an unsigned 32-bit integer in big-endian byte order"
+  (declare ((unsigned-byte 32) value))
+  (encode :raw-bytes (uint-to-octets-be value :min-size 4) stream))
+
+(defmethod encode ((type (eql :uint32-le)) value stream &key)
+  "Encode an unsigned 32-bit integer in little-endian byte order"
+  (declare ((unsigned-byte 32) value))
+  (encode :raw-bytes (uint-to-octets-le value :min-size 4) stream))
+
+(defmethod encode ((type (eql :uint64-be)) value stream &key)
+  "Encode an unsigned 64-bit integer in big-endian byte order"
+  (declare ((unsigned-byte 64) value))
+  (encode :raw-bytes (uint-to-octets-be value :min-size 8) stream))
+
+(defmethod encode ((type (eql :uint64-le)) value stream &key)
+  "Encode an unsigned 64-bit integer in little-endian byte order"
+  (declare ((unsigned-byte 64) value))
+  (encode :raw-bytes (uint-to-octets-le value :min-size 8) stream))
