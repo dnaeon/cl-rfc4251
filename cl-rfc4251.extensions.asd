@@ -22,9 +22,7 @@
                :ironclad)
   :components ((:module "extensions"
                 :pathname #P"src/extensions/"
-                :serial t
                 :components ((:file "package")
-                             (:file "integer")
-                             (:file "ssh-cert")
-                             (:file "ssh-public-key"))))
+                             (:file "ssh-cert" :depends-on ("package"))
+                             (:file "ssh-public-key" :depends-on ("package")))))
   :in-order-to ((test-op (test-op "cl-rfc4251.test"))))

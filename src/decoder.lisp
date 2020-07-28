@@ -82,11 +82,36 @@ bytes that were actually read to produce the value."))
          (result (if (zerop byte) nil t)))
     (values result size)))
 
+(defmethod decode ((type (eql :uint16-be)) stream &key)
+  "Decode 16-bit unsigned integer using big-endian byte order"
+  (let ((size 2))
+    (values
+     (decode-uint-be (decode :raw-bytes stream :length size))
+     size)))
+
+(defmethod decode ((type (eql :uint16-le)) stream &key)
+  "Decode 16-bit unsigned integer using little-endian byte order"
+  (let ((size 2))
+    (values
+     (decode-uint-le (decode :raw-bytes stream :length size))
+     size)))
+
+(defmethod decode ((type (eql :uint16)) stream &key)
+  "Synonym for :uint16-be"
+  (decode :uint16-be stream))
+
 (defmethod decode ((type (eql :uint32-be)) stream &key)
   "Decode 32-bit unsigned integer using big-endian byte order"
   (let ((size 4))
     (values
      (decode-uint-be (decode :raw-bytes stream :length size))
+     size)))
+
+(defmethod decode ((type (eql :uint32-le)) stream &key)
+  "Decode 32-bit unsigned integer using little-endian byte order"
+  (let ((size 4))
+    (values
+     (decode-uint-le (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint32)) stream &key)
@@ -98,6 +123,13 @@ bytes that were actually read to produce the value."))
   (let ((size 8))
     (values
      (decode-uint-be (decode :raw-bytes stream :length size))
+     size)))
+
+(defmethod decode ((type (eql :uint64-le)) stream &key)
+  "Decode 64-bit unsigned integer using little-endian byte order"
+  (let ((size 8))
+    (values
+     (decode-uint-le (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint64)) stream &key)

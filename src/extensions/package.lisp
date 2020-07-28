@@ -6,9 +6,7 @@
    :ironclad)
   (:import-from
    :cl-rfc4251.decoder
-   :decode
-   :decode-uint-be
-   :decode-uint-le)
+   :decode)
   (:import-from
    :cl-rfc4251.stream
    :make-binary-input-stream)
