@@ -116,3 +116,11 @@ Returns the number of bytes that were written to the stream."))
 (defmethod encode ((type (eql :uint64)) value stream &key)
   "Synonym for :uint64-be"
   (encode :uint64-be value stream))
+
+(defmethod encode ((type (eql :uint-be)) value stream &key)
+  "Encode arbitrary-length unsigned integer in big-endian byte order"
+  (encode :raw-bytes (uint-to-octets-be value) stream))
+
+(defmethod encode ((type (eql :uint-le)) value stream &key)
+  "Encode arbitrary-length unsigned integer in little-endian byte order"
+  (encode :raw-bytes (uint-to-octets-le value) stream))
