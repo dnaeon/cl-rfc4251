@@ -115,3 +115,29 @@ Returns the number of bytes that were written to the stream."))
     (loop for char across value do
       (encode :byte (char-code char) stream))
     (+ size 4)))
+
+(defmethod encode ((type (eql :mpint)) value stream &key n-bits mask-bits)
+  "Encode a given integer value in two's complement format"
+  (declare ((integer) value))
+
+  ;; Propery handle a zero mpint value
+  (when (zerop value)
+    (return-from encode (encode :uint32-be 0 stream)))
+
+  (let* ((header-size 4) ;; The uint32 header value
+         (value-bits (* (ceiling (/ (integer-length value) 8)) 8))
+         (data (encode-twos-complement value :n-bits n-bits :mask-bits mask-bits)) ;; The value partition to be written
+         (data-length (length data)) ;; The size of the encoded data
+         (msb-set-p (logbitp (1- value-bits) value))) ;; Is MSB bit set on the value?
+    (if (and (plusp value) msb-set-p)
+        ;; Positive integers for which the MSB bit is set should be
+        ;; preceeded by the #x00 byte in the encoded data according to RFC 4251.
+        (progn
+          (encode :uint32 (1+ data-length) stream) ;; Size of the value partition + 1 for the zero byte
+          (encode :byte #x00 stream) ;; The preceeding zero byte for positive integers with MSB set
+          (encode :raw-bytes data stream) ;; The actual value partition
+          (1+ (+ header-size data-length))) ;; 1+ for the extra zero byte
+        (progn
+          (encode :uint32 data-length stream)
+          (encode :raw-bytes data stream)
+          (+ header-size data-length)))))
