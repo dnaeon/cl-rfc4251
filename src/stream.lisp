@@ -78,6 +78,9 @@
         (prog1 (aref data index)
                (incf index)))))
 
+(defmethod stream-element-type ((stream binary-input-stream))
+  '(unsigned-byte 8))
+
 (defmethod print-object ((object binary-input-stream) stream)
   (print-unreadable-object (object stream :type t)
     (with-slots (data index end) object
@@ -96,6 +99,9 @@
   (with-slots (data) stream
     (vector-push-extend value data))
   value)
+
+(defmethod stream-element-type ((stream binary-output-stream))
+  '(unsigned-byte 8))
 
 (defmethod print-object ((object binary-output-stream) stream)
   (print-unreadable-object (object stream :type t)
