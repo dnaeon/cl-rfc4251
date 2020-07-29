@@ -30,31 +30,14 @@
   (:import-from
    :uiop
    :split-string)
-  (:export
-   :decode
+  (:import-from
+   :cl-rfc4251.util
    :decode-uint-be
    :decode-uint-le
-   :decode-mpint-be))
+   :decode-twos-complement)
+  (:export
+   :decode))
 (in-package :cl-rfc4251.decoder)
-
-(defun decode-uint-be (bytes)
-  "Decode a vector of bytes into an unsigned integer, using big-endian byte order"
-  (let ((result 0))
-    (loop for byte across bytes
-          for position from (1- (length bytes)) downto 0
-          for bits-to-shift = (* position 8)
-          do (setf result (logior result (ash byte bits-to-shift))))
-    result))
-
-(defun decode-uint-le (bytes)
-  "Decode a vector of bytes into unsigned integer, using litte-endian byte order"
-  (decode-uint-be (reverse bytes)))
-
-(defun decode-twos-complement (bytes &optional (n-bits (* (length bytes) 8)))
-  "Decodes a two's complement value"
-  (let ((mask (expt 2 (1- n-bits)))
-        (c (decode-uint-be bytes)))
-    (+ (- (logand c mask)) (logand c (lognot mask)))))
 
 (defgeneric decode (type stream &key)
   (:documentation "Decode a value with the given type from the binary

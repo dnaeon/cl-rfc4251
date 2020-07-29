@@ -28,6 +28,14 @@
   (:use :cl)
   (:nicknames :rfc4251)
   (:import-from
+   :cl-rfc4251.util
+   :encode-uint-be
+   :encode-uint-le
+   :decode-uint-be
+   :decode-uint-le
+   :encode-twos-complement
+   :decode-twos-complement)
+  (:import-from
    :cl-rfc4251.decoder
    :decode)
   (:import-from
@@ -44,6 +52,14 @@
    :binary-output-stream-data
    :make-binary-output-stream)
   (:export
+   ;; util
+   :encode-uint-be
+   :encode-uint-le
+   :decode-uint-be
+   :decode-uint-le
+   :encode-twos-complement
+   :decode-twos-complement
+
    ;; encoder
    :encode
 
