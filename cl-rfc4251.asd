@@ -17,8 +17,12 @@
   :source-control "https://github.com/dnaeon/cl-rfc4251"
   :depends-on (:trivial-gray-streams
                :uiop)
-  :components ((:module "core"
+  :components ((:module "util"
                 :pathname #P"src/"
+                :components ((:file "util")))
+               (:module "core"
+                :pathname #P"src/"
+                :depends-on ("util")
                 :components ((:file "decoder")
                              (:file "encoder")
                              (:file "stream")))
