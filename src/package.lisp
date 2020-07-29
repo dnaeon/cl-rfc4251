@@ -34,7 +34,8 @@
    :decode-uint-be
    :decode-uint-le
    :encode-twos-complement
-   :decode-twos-complement)
+   :decode-twos-complement
+   :twos-complement)
   (:import-from
    :cl-rfc4251.decoder
    :decode)
@@ -59,6 +60,7 @@
    :decode-uint-le
    :encode-twos-complement
    :decode-twos-complement
+   :twos-complement
 
    ;; encoder
    :encode

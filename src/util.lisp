@@ -32,6 +32,7 @@
    :encode-uint-le
    :decode-uint-be
    :decode-uint-le
+   :twos-complement
    :encode-twos-complement
    :decode-twos-complement))
 (in-package :cl-rfc4251.util)
@@ -69,17 +70,28 @@ The resulting vector will contain at least MIN-SIZE bytes"
   "Decode a vector of bytes into unsigned integer, using litte-endian byte order"
   (decode-uint-be (reverse bytes)))
 
-(defun encode-twos-complement (n &key n-bits)
+(defun encode-twos-complement (n &key n-bits mask-bits)
   "Encodes N into two's complement format"
-  (let* ((n-bits (or n-bits
-                     (* (ceiling (/ (integer-length n) 8)) 8)))
-         (n (if (plusp n) n (abs n))))
-    (encode-uint-be (- (expt 2 n-bits) n))))
+  (when (zerop n)
+    (return-from encode-twos-complement (encode-uint-be 0)))
+
+  (let* ((n-bits (or n-bits (integer-length n)))
+         (twos-c (twos-complement n n-bits))
+         (mask-bits (or mask-bits (* (ceiling (/ n-bits 8)) 8)))
+         (mask (expt 2 mask-bits)))
+    (if (minusp twos-c)
+        (encode-uint-be (+ mask twos-c))
+        (encode-uint-be twos-c))))
 
 (defun decode-twos-complement (bytes &key (n-bits (* (length bytes) 8)))
   "Decodes a two's complement encoded value"
   (assert (plusp n-bits) (n-bits))
-  (let ((mask (expt 2 (1- n-bits)))
-        (c (decode-uint-be bytes)))
-    (+ (- (logand c mask)) (logand c (lognot mask)))))
+  (let ((value (decode-uint-be bytes)))
+    (twos-complement value n-bits)))
 
+(defun twos-complement (n n-bits)
+  "Returns the two's complement of the given number"
+  (assert (plusp n-bits) (n-bits))
+  (let* ((mask (expt 2 (1- n-bits))))
+    (+ (- (logand n mask))
+       (logand n (lognot mask)))))
