@@ -107,3 +107,11 @@ Returns the number of bytes that were written to the stream."))
 (defmethod encode ((type (eql :uint-le)) value stream &key)
   "Encode arbitrary-length unsigned integer in little-endian byte order"
   (encode :raw-bytes (encode-uint-le value) stream))
+
+(defmethod encode ((type (eql :string)) value stream &key)
+  "Encode a string value into the given binary stream"
+  (let ((size (length value)))
+    (encode :uint32 size stream)
+    (loop for char across value do
+      (encode :byte (char-code char) stream))
+    (+ size 4)))
