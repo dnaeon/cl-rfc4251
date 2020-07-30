@@ -34,8 +34,42 @@
    :decode-uint-le
    :twos-complement
    :encode-twos-complement
-   :decode-twos-complement))
+   :decode-twos-complement
+   :mpint
+   :mpint-value
+   :mpint-bytes))
 (in-package :cl-rfc4251.util)
+
+(defgeneric mpint-bytes (object &key)
+  (:documentation "Returns the bytes of a multiple precision integer value"))
+
+(defgeneric mpint-value (object &key)
+  (:documentation "Returns the value representing a multiple precision integer from given bytes"))
+
+(defclass mpint ()
+  ((bytes
+    :initarg :bytes
+    :initform (error "Must specify mpint bytes")
+    :documentation "Bytes of the mpint value"))
+  (:documentation "Class representing a multiple precision integer value"))
+
+(defmethod mpint-value ((object mpint) &key)
+  "Returns the mpint value for the given object"
+  (with-slots (bytes) object
+    (decode-twos-complement bytes)))
+
+(defmethod mpint-value ((object simple-array) &key)
+  "Returns an mpint represented by the the given vector of bytes"
+  (decode-twos-complement object))
+
+(defmethod mpint-bytes ((object mpint) &key)
+  "Returns the bytes for the mpint object"
+  (with-slots (bytes) object
+    bytes))
+
+(defmethod mpint-bytes ((object integer) &key n-bits mask-bits)
+  "Returns the bytes representing an mpint value for the given integer"
+  (encode-twos-complement object :n-bits n-bits :mask-bits mask-bits))
 
 (defun encode-uint-be (value &key (min-size 1))
   "Encode an unsigned integer value to a vector of bytes in big-endian byte order.

@@ -35,7 +35,10 @@
    :decode-uint-le
    :encode-twos-complement
    :decode-twos-complement
-   :twos-complement)
+   :twos-complement
+   :mpint
+   :mpint-value
+   :mpint-bytes)
   (:import-from
    :cl-rfc4251.decoder
    :decode)
@@ -61,6 +64,9 @@
    :encode-twos-complement
    :decode-twos-complement
    :twos-complement
+   :mpint
+   :mpint-value
+   :mpint-bytes
 
    ;; encoder
    :encode
