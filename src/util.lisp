@@ -37,7 +37,8 @@
    :decode-twos-complement
    :mpint
    :mpint-value
-   :mpint-bytes))
+   :mpint-bytes
+   :trim-mpint-bytes))
 (in-package :cl-rfc4251.util)
 
 (defgeneric mpint-bytes (object &key)
@@ -62,8 +63,13 @@
   "Returns an mpint represented by the the given vector of bytes"
   (decode-twos-complement object))
 
-(defmethod mpint-bytes ((object mpint) &key)
+(defmethod mpint-value ((object integer) &key)
+  "Returns the mpint value of the given integer"
+  object)
+
+(defmethod mpint-bytes ((object mpint) &key n-bits mask-bits)
   "Returns the bytes for the mpint object"
+  (declare (ignore n-bits mask-bits))
   (with-slots (bytes) object
     bytes))
 
@@ -129,3 +135,10 @@ The resulting vector will contain at least MIN-SIZE bytes"
   (let* ((mask (expt 2 (1- n-bits))))
     (+ (- (logand n mask))
        (logand n (lognot mask)))))
+
+(defun trim-mpint-bytes (bytes)
+  "Trim any unnecessary leading #x00 and #xFF bytes according to RFC 4251"
+  (loop for byte across bytes
+        for i from 0
+        while (or (= byte #x00) (= byte #xFF))
+        finally (return (subseq bytes (1- i)))))
