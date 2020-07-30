@@ -141,4 +141,4 @@ The resulting vector will contain at least MIN-SIZE bytes"
   (loop for byte across bytes
         for i from 0
         while (or (= byte #x00) (= byte #xFF))
-        finally (return (subseq bytes (1- i)))))
+        finally (return (subseq bytes (if (zerop i) i (1- i))))))
