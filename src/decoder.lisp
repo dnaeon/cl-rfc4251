@@ -34,7 +34,8 @@
    :cl-rfc4251.util
    :decode-uint-be
    :decode-uint-le
-   :decode-twos-complement)
+   :decode-twos-complement
+   :mpint)
   (:export
    :decode))
 (in-package :cl-rfc4251.decoder)
@@ -141,7 +142,7 @@ bytes that were actually read to produce the value."))
     (loop repeat length
           do (vector-push (read-byte stream) bytes))
     (values
-     (decode-twos-complement bytes)
+     (make-instance 'mpint :bytes bytes)
      (+ size length))))
 
 (defmethod decode ((type (eql :name-list)) stream &key)
