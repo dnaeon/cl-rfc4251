@@ -14,7 +14,6 @@
   :bug-tracker "https://github.com/dnaeon/cl-rfc4251"
   :source-control "https://github.com/dnaeon/cl-rfc4251"
   :depends-on (:cl-rfc4251
-               :cl-rfc4251.extensions
                :rove)
   :components ((:module "tests"
                 :pathname #P"t/"

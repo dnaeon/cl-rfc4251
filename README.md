@@ -26,13 +26,6 @@ Load the system.
 CL-USER> (ql:quickload :cl-rfc4251)
 ```
 
-If you need to use any of the extensions available via the
-`cl-rfc4251.extensions` system, you need to load it as well.
-
-``` common-lisp
-CL-USER> (ql:quickload :cl-rfc4251.extensions)
-```
-
 ## Supported Data Types
 
 The following table summarizes the supported data types, that can be
@@ -63,24 +56,6 @@ mentioned in RFC 4251.
 | `:uint16-le`    | Unsigned 16-bit integer in little-endian byte order |
 | `:uint32-le`    | Unsigned 32-bit integer in little-endian byte order |
 | `:uint64-le`    | Unsigned 64-bit integer in little-endian byte order |
-
-## Extensions
-
-Decoding and encoding of additional types, which are based on the
-primitive data types defined in [RFC 4251][RFC 4251] is provided
-by the `cl-rfc4251.extensions` system.
-
-The following table summarizes the additional data types provided by
-the `cl-rfc4251.extensions` system, which can be used by the
-`RFC4251:DECODE` and `RFC4251:ENCODE` generic functions.
-
-| cl-rfc4251 type                  | Description                                                                                                                                         |
-|----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `:ssh-cert-embedded-string-list` | List of strings, embedded within a `string`. Used in [OpenSSH certificates][OpenSSH.certkey], e.g. `valid principals`                               |
-| `:ssh-cert-options`              | List of tuples, describing [OpenSSH certificate][OpenSSH.certkey] options, e.g. `critical options` and `extensions`                                 |
-| `:ssh-cert-nonce`                | Nonce field used in [OpenSSH certificates][OpenSSH.certkey], a CA-provided random bitstring of arbitrary length                                     |
-| `:ssh-rsa-public-key`            | SSH RSA public key encoded as per [RFC 4253, Section 6.6][RFC 4253].                                                                                |
-| `:rsa-public-key`                | RSA public key encoded as per [RFC 3447, Section 3.1][RFC 3447]. Unlike `:ssh-rsa-public-key` the data here is not preceeded by a key kind `string` |
 
 ## Usage
 
@@ -192,7 +167,7 @@ The result from the second expression here is `17`, which includes the
 `4` (uint32) bytes required for the header (representing the bytes that follow),
 plus the additional `13` bytes representing the actual string data.
 
-The following examples shows how to encode `mpint` values according to
+The following examples show how to encode `mpint` values according to
 [RFC 4251][RFC 4251].
 
 ``` common-lisp
@@ -223,33 +198,6 @@ CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:binary-output-stream-data s))
 #(0 0 0 2 237 204)
 ```
-
-### Extensions
-
-If you have loaded the `cl-rfc4251.extensions` system you can decode
-and encode various additional data types.
-
-For example you can decode an OpenSSH public key using the
-`rfc4251.extensions:parse-ssh-public-key` function.
-
-``` common-lisp
-CL-USER> (defparameter *public-key*
-           (rfc4251.extensions:parse-ssh-public-key-file #P"~/.ssh/id_rsa.pub"))
-*PUBLIC-KEY*
-```
-
-``` common-lisp
-CL-USER> (rfc4251.extensions:ssh-public-key-kind *public-key*)
-"ssh-rsa"
-CL-USER> (rfc4251.extensions:ssh-public-key-comment *public-key*)
-"dnaeon@localhost"
-CL-USER> (rfc4251.extensions:ssh-public-key-data *public-key*)
-#<IRONCLAD:RSA-PUBLIC-KEY {1003DC1BB3}>
-```
-
-TODO: Add examples for computing the fingerprint of a key
-TODO: Add examples for encoding back an already parsed key
-TODO: Add examples for writing a public key to a file
 
 ## Tests
 
@@ -293,9 +241,6 @@ This project is Open Source and licensed under the [BSD
 License](http://opensource.org/licenses/BSD-2-Clause).
 
 [RFC 4251]: https://tools.ietf.org/html/rfc4251
-[RFC 4253]: https://tools.ietf.org/html/rfc4253
-[RFC 3447]: https://tools.ietf.org/html/rfc3447
 [Quicklisp]: https://www.quicklisp.org/beta/
 [Quicklisp FAQ]: https://www.quicklisp.org/beta/faq.html
 [cl-rfc4251]: https://github.com/dnaeon/cl-rfc4251
-[OpenSSH.certkey]: https://cvsweb.openbsd.org/src/usr.bin/ssh/PROTOCOL.certkeys?annotate=HEAD
