@@ -247,7 +247,27 @@
           "Encode mpint #x9A378F9B2E332A7 value")
       (ok (equalp #(#x00 #x00 #x00 #x08 #x09 #xA3 #x78 #xF9 #xB2 #xE3 #x32 #xA7)
                   (binary-output-stream-data stream5))
-          "Encoded mpint #x9A378F9B2E332A7 matches with the expected data"))))
+          "Encoded mpint #x9A378F9B2E332A7 matches with the expected data")))
+
+  (testing "encode name-list"
+    (let ((stream1 (make-binary-output-stream))
+          (stream2 (make-binary-output-stream))
+          (stream3 (make-binary-output-stream)))
+      (ok (= 4 (encode :name-list nil stream1)) ;; Just the uint32 header value is expected
+          "Encode empty :name-list value")
+      (ok (equalp #(#x00 #x00 #x00 #x00)
+                  (binary-output-stream-data stream1))
+          "Encoded empty :name-list value matches with expected data")
+      (ok (= 8 (encode :name-list (list "zlib") stream2))
+          "Encode :name-list (zlib) value")
+      (ok (equalp #(#x00 #x00 #x00 #x04 #x7A #x6C #x69 #x62)
+                  (binary-output-stream-data stream2))
+          "Encoded :name-list (zlib) matches with expected data")
+      (ok (= 13 (encode :name-list (list "zlib" "none") stream3))
+          "Encode :name-list (zlib none) value")
+      (ok (equalp #(#x00 #x00 #x00 #x09 #x7A #x6C #x69 #x62 #x2C #x6E #x6F #x6E #x65)
+                  (binary-output-stream-data stream3))
+          "Encoded :name-list (zlib none) matches with expected data"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
