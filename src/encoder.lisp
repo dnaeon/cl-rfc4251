@@ -29,9 +29,8 @@
   (:nicknames :rfc4251.encoder)
   (:import-from
    :cl-rfc4251.util
-   :encode-uint-be
-   :encode-uint-le
-   :encode-twos-complement)
+   :encode-int-be
+   :encode-int-le)
   (:export
    :encode))
 (in-package :cl-rfc4251.encoder)
@@ -61,12 +60,12 @@ Returns the number of bytes that were written to the stream."))
 (defmethod encode ((type (eql :uint16-be)) value stream &key)
   "Encode an unsigned 16-bit integer in big-endian byte order"
   (declare ((unsigned-byte 16) value))
-  (encode :raw-bytes (encode-uint-be value :min-size 2) stream))
+  (encode :raw-bytes (encode-int-be value :add-sign nil :min-bytes 2) stream))
 
 (defmethod encode ((type (eql :uint16-le)) value stream &key)
   "Encode an unsigned 16-bit integer in little-endian byte order"
   (declare ((unsigned-byte 16) value))
-  (encode :raw-bytes (encode-uint-le value :min-size 2) stream))
+  (encode :raw-bytes (encode-int-le value :add-sign nil :min-bytes 2) stream))
 
 (defmethod encode ((type (eql :uint16)) value stream &key)
   "Synonym for :uint16-be"
@@ -75,12 +74,12 @@ Returns the number of bytes that were written to the stream."))
 (defmethod encode ((type (eql :uint32-be)) value stream &key)
   "Encode an unsigned 32-bit integer in big-endian byte order"
   (declare ((unsigned-byte 32) value))
-  (encode :raw-bytes (encode-uint-be value :min-size 4) stream))
+  (encode :raw-bytes (encode-int-be value :add-sign nil :min-bytes 4) stream))
 
 (defmethod encode ((type (eql :uint32-le)) value stream &key)
   "Encode an unsigned 32-bit integer in little-endian byte order"
   (declare ((unsigned-byte 32) value))
-  (encode :raw-bytes (encode-uint-le value :min-size 4) stream))
+  (encode :raw-bytes (encode-int-le value :add-sign nil :min-bytes 4) stream))
 
 (defmethod encode ((type (eql :uint32)) value stream &key)
   "Synonym for :uint32-be"
@@ -89,24 +88,16 @@ Returns the number of bytes that were written to the stream."))
 (defmethod encode ((type (eql :uint64-be)) value stream &key)
   "Encode an unsigned 64-bit integer in big-endian byte order"
   (declare ((unsigned-byte 64) value))
-  (encode :raw-bytes (encode-uint-be value :min-size 8) stream))
+  (encode :raw-bytes (encode-int-be value :add-sign nil :min-bytes 8) stream))
 
 (defmethod encode ((type (eql :uint64-le)) value stream &key)
   "Encode an unsigned 64-bit integer in little-endian byte order"
   (declare ((unsigned-byte 64) value))
-  (encode :raw-bytes (encode-uint-le value :min-size 8) stream))
+  (encode :raw-bytes (encode-int-le value :add-sign nil :min-bytes 8) stream))
 
 (defmethod encode ((type (eql :uint64)) value stream &key)
   "Synonym for :uint64-be"
   (encode :uint64-be value stream))
-
-(defmethod encode ((type (eql :uint-be)) value stream &key)
-  "Encode arbitrary-length unsigned integer in big-endian byte order"
-  (encode :raw-bytes (encode-uint-be value) stream))
-
-(defmethod encode ((type (eql :uint-le)) value stream &key)
-  "Encode arbitrary-length unsigned integer in little-endian byte order"
-  (encode :raw-bytes (encode-uint-le value) stream))
 
 (defmethod encode ((type (eql :string)) value stream &key)
   "Encode a string value into the given binary stream"
@@ -116,28 +107,15 @@ Returns the number of bytes that were written to the stream."))
       (encode :byte (char-code char) stream))
     (+ size 4)))
 
-(defmethod encode ((type (eql :mpint)) value stream &key n-bits mask-bits)
-  "Encode a given integer value in two's complement format"
+(defmethod encode ((type (eql :mpint)) value stream &key)
+  "Encode the given multiple precision integer value into the binary stream"
   (declare ((integer) value))
 
   ;; Propery handle a zero mpint value
   (when (zerop value)
     (return-from encode (encode :uint32-be 0 stream)))
 
-  (let* ((header-size 4) ;; The uint32 header value
-         (value-bits (* (ceiling (/ (integer-length value) 8)) 8))
-         (data (encode-twos-complement value :n-bits n-bits :mask-bits mask-bits)) ;; The value partition to be written
-         (data-length (length data)) ;; The size of the encoded data
-         (msb-set-p (logbitp (1- value-bits) value))) ;; Is MSB bit set on the value?
-    (if (and (plusp value) msb-set-p)
-        ;; Positive integers for which the MSB bit is set should be
-        ;; preceeded by the #x00 byte in the encoded data according to RFC 4251.
-        (progn
-          (encode :uint32 (1+ data-length) stream) ;; Size of the value partition + 1 for the zero byte
-          (encode :byte #x00 stream) ;; The preceeding zero byte for positive integers with MSB set
-          (encode :raw-bytes data stream) ;; The actual value partition
-          (1+ (+ header-size data-length))) ;; 1+ for the extra zero byte
-        (progn
-          (encode :uint32 data-length stream)
-          (encode :raw-bytes data stream)
-          (+ header-size data-length)))))
+  (let ((data (encode-int-be value)))
+    (+
+     (encode :uint32-be (length data) stream)
+     (encode :raw-bytes data stream))))

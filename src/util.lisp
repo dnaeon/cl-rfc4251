@@ -28,72 +28,48 @@
   (:use :cl)
   (:nicknames :rfc4251.util)
   (:export
-   :encode-uint-be
-   :encode-uint-le
-   :decode-uint-be
-   :decode-uint-le
-   :twos-complement
-   :encode-twos-complement
-   :decode-twos-complement
-   :mpint
-   :mpint-value
-   :mpint-bytes
-   :trim-mpint-bytes))
+   :encode-int-be
+   :encode-int-le
+   :decode-int-be
+   :decode-int-le
+   :twos-complement))
 (in-package :cl-rfc4251.util)
 
-(defgeneric mpint-bytes (object &key)
-  (:documentation "Returns the bytes of a multiple precision integer value"))
+(defun encode-int-be (value &key (add-sign t) (min-bytes 1))
+  "Encode the given value as bytes in big-endian byte order"
+  (assert (plusp min-bytes) (min-bytes))
+  (let ((mask #xFF)
+        (result (make-array 0
+                            :adjustable t
+                            :fill-pointer 0
+                            :element-type '(unsigned-byte 8)))
+        (zero-byte #x00)
+        (max-byte #xFF))
 
-(defgeneric mpint-value (object &key)
-  (:documentation "Returns the value representing a multiple precision integer from given bytes"))
+    ;; Encode the integer into the result vector
+    (loop for byte = (logand value mask)
+          until (or (zerop value) (= value -1))
+          do
+             (vector-push-extend byte result)
+             (setf value (ash value -8)))
 
-(defclass mpint ()
-  ((bytes
-    :initarg :bytes
-    :initform (error "Must specify mpint bytes")
-    :documentation "Bytes of the mpint value"))
-  (:documentation "Class representing a multiple precision integer value"))
+    ;; Padding
+    (loop repeat (- min-bytes (length result)) do
+      (vector-push-extend (ldb (byte 8 0) value) result))
 
-(defmethod mpint-value ((object mpint) &key)
-  "Returns the mpint value for the given object"
-  (with-slots (bytes) object
-    (decode-twos-complement bytes)))
+    (let ((msb-byte-index (1- (length result)))) ;; We are still in little-endian for now
+      ;; Add sign byte, if needed.
+      (cond
+        ((and add-sign (zerop value) (>= (aref result msb-byte-index) #x80)) ;; Positives
+         (vector-push-extend zero-byte result))
+        ((and add-sign (= value -1) (< (aref result msb-byte-index) #x80)) ;; Negatives
+         (vector-push-extend max-byte result))))
 
-(defmethod mpint-value ((object simple-array) &key)
-  "Returns an mpint represented by the the given vector of bytes"
-  (decode-twos-complement object))
+    ;; Represent in big-endian
+    (nreverse result)))
 
-(defmethod mpint-value ((object integer) &key)
-  "Returns the mpint value of the given integer"
-  object)
-
-(defmethod mpint-bytes ((object mpint) &key n-bits mask-bits)
-  "Returns the bytes for the mpint object"
-  (declare (ignore n-bits mask-bits))
-  (with-slots (bytes) object
-    bytes))
-
-(defmethod mpint-bytes ((object integer) &key n-bits mask-bits)
-  "Returns the bytes representing an mpint value for the given integer"
-  (encode-twos-complement object :n-bits n-bits :mask-bits mask-bits))
-
-(defun encode-uint-be (value &key (min-size 1))
-  "Encode an unsigned integer value to a vector of bytes in big-endian byte order.
-The resulting vector will contain at least MIN-SIZE bytes."
-  (assert (plusp min-size) (min-size))
-  (let* ((value-size-in-bytes (ceiling (/ (integer-length value) 8)))
-         (vector-size (max min-size value-size-in-bytes))
-         (result (make-array vector-size
-                             :element-type '(unsigned-byte 8)
-                             :initial-element 0)))
-    (loop for byte-offset from 0 below value-size-in-bytes
-          for vector-index from (1- vector-size) downto 0 do
-            (setf (elt result vector-index)
-                  (ldb (byte 8 (* 8 byte-offset)) value)))
-    result))
-
-(defun decode-uint-be (bytes)
-  "Decode a vector of bytes into an unsigned integer, using big-endian byte order"
+(defun decode-int-be (bytes)
+  "Decode a vector of bytes into an integer, using big-endian byte order"
   (let ((result 0))
     (loop for byte across bytes
           for position from (1- (length bytes)) downto 0
@@ -101,33 +77,13 @@ The resulting vector will contain at least MIN-SIZE bytes."
           do (setf result (logior result (ash byte bits-to-shift))))
     result))
 
-(defun encode-uint-le (value &key (min-size 1))
-  "Convert an integer value to a vector of bytes in little-endian byte order.
-The resulting vector will contain at least MIN-SIZE bytes"
-  (reverse (encode-uint-be value :min-size min-size)))
+(defun encode-int-le (value &key (add-sign t) (min-bytes 1))
+  "Convert an integer value to a vector of bytes in little-endian byte order"
+  (reverse (encode-int-be value :add-sign add-sign :min-bytes min-bytes)))
 
-(defun decode-uint-le (bytes)
-  "Decode a vector of bytes into unsigned integer, using litte-endian byte order"
-  (decode-uint-be (reverse bytes)))
-
-(defun encode-twos-complement (n &key n-bits mask-bits)
-  "Encodes N into two's complement format"
-  (when (zerop n)
-    (return-from encode-twos-complement (encode-uint-be 0)))
-
-  (let* ((n-bits (or n-bits (integer-length n)))
-         (twos-c (twos-complement n n-bits))
-         (mask-bits (or mask-bits (* (ceiling (/ n-bits 8)) 8)))
-         (mask (expt 2 mask-bits)))
-    (if (minusp twos-c)
-        (encode-uint-be (+ mask twos-c))
-        (encode-uint-be twos-c))))
-
-(defun decode-twos-complement (bytes &key (n-bits (* (length bytes) 8)))
-  "Decodes a two's complement encoded value"
-  (assert (plusp n-bits) (n-bits))
-  (let ((value (decode-uint-be bytes)))
-    (twos-complement value n-bits)))
+(defun decode-int-le (bytes)
+  "Decode a vector of bytes into integer, using litte-endian byte order"
+  (decode-int-be (reverse bytes)))
 
 (defun twos-complement (n n-bits)
   "Returns the two's complement of the given number"
@@ -135,10 +91,3 @@ The resulting vector will contain at least MIN-SIZE bytes"
   (let* ((mask (expt 2 (1- n-bits))))
     (+ (- (logand n mask))
        (logand n (lognot mask)))))
-
-(defun trim-mpint-bytes (bytes)
-  "Trim any unnecessary leading #x00 and #xFF bytes according to RFC 4251"
-  (loop for byte across bytes
-        for i from 0
-        while (or (= byte #x00) (= byte #xFF))
-        finally (return (subseq bytes (if (zerop i) i (1- i))))))

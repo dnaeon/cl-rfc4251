@@ -32,10 +32,9 @@
    :split-string)
   (:import-from
    :cl-rfc4251.util
-   :decode-uint-be
-   :decode-uint-le
-   :decode-twos-complement
-   :mpint)
+   :decode-int-be
+   :decode-int-le
+   :twos-complement)
   (:export
    :decode))
 (in-package :cl-rfc4251.decoder)
@@ -70,14 +69,14 @@ bytes that were actually read to produce the value."))
   "Decode 16-bit unsigned integer using big-endian byte order"
   (let ((size 2))
     (values
-     (decode-uint-be (decode :raw-bytes stream :length size))
+     (decode-int-be (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint16-le)) stream &key)
   "Decode 16-bit unsigned integer using little-endian byte order"
   (let ((size 2))
     (values
-     (decode-uint-le (decode :raw-bytes stream :length size))
+     (decode-int-le (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint16)) stream &key)
@@ -88,14 +87,14 @@ bytes that were actually read to produce the value."))
   "Decode 32-bit unsigned integer using big-endian byte order"
   (let ((size 4))
     (values
-     (decode-uint-be (decode :raw-bytes stream :length size))
+     (decode-int-be (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint32-le)) stream &key)
   "Decode 32-bit unsigned integer using little-endian byte order"
   (let ((size 4))
     (values
-     (decode-uint-le (decode :raw-bytes stream :length size))
+     (decode-int-le (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint32)) stream &key)
@@ -106,14 +105,14 @@ bytes that were actually read to produce the value."))
   "Decode 64-bit unsigned integer using big-endian byte order"
   (let ((size 8))
     (values
-     (decode-uint-be (decode :raw-bytes stream :length size))
+     (decode-int-be (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint64-le)) stream &key)
   "Decode 64-bit unsigned integer using little-endian byte order"
   (let ((size 8))
     (values
-     (decode-uint-le (decode :raw-bytes stream :length size))
+     (decode-int-le (decode :raw-bytes stream :length size))
      size)))
 
 (defmethod decode ((type (eql :uint64)) stream &key)
@@ -134,16 +133,15 @@ bytes that were actually read to produce the value."))
 
 (defmethod decode ((type (eql :mpint)) stream &key)
   "Decode a multiple precision integer in two's complement format"
-  (let* ((size 4) ;; Size of the uint32 number specifying the mpint length
-         (length (decode :uint32-be stream))
-         (bytes (make-array length :fill-pointer 0)))
+  (let* ((header-size 4) ;; Size of the uint32 number specifying the mpint length
+         (length (decode :uint32-be stream)))
     (when (zerop length)
-      (return-from decode (values 0 size)))
-    (loop repeat length
-          do (vector-push (read-byte stream) bytes))
-    (values
-     (make-instance 'mpint :bytes bytes)
-     (+ size length))))
+      (return-from decode (values 0 header-size)))
+
+    (let ((data (decode :raw-bytes stream :length length)))
+      (values
+       (twos-complement (decode-int-be data) (* length 8))
+       (+ header-size length)))))
 
 (defmethod decode ((type (eql :name-list)) stream &key)
   "Decode a comma-separated list of names from the given binary stream"
