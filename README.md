@@ -51,7 +51,7 @@ Lisp.
 | `uint64`    | `:uint64`       | Unsigned 64-bit integer in big-endian byte order |
 | `string`    | `:string`       | Arbitrary length string                          |
 | `mpint`     | `:mpint`        | Multiple precision integer                       |
-| `name-list` | `:name-list`    | A list of string names                           |
+| `name-list` | `:name-list`    | A string of comma-separated names                |
 
 In addition to the above data types the `cl-rfc4251` system supports
 encoding and decoding of these types as well. Note, that these are not

@@ -119,3 +119,8 @@ Returns the number of bytes that were written to the stream."))
     (+
      (encode :uint32-be (length data) stream)
      (encode :raw-bytes data stream))))
+
+(defmethod encode ((type (eql :name-list)) value stream &key)
+  "Encode a list of strings into the binary stream"
+  (let* ((data (format nil "~{~a~^,~}" value))) ;; Comma-separated string
+    (encode :string data stream)))
