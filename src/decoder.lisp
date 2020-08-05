@@ -149,3 +149,14 @@ bytes that were actually read to produce the value."))
     (values
      (split-string value :separator (list #\Comma))
      size)))
+
+(defmethod decode ((type (eql :c-string)) stream &key)
+  "Decode a NULL-terminated C string from the given stream"
+  (let ((result (make-string-output-stream))
+        (size 0))
+    (loop for char = (code-char (read-byte stream))
+          for i from 1
+          until (char= char #\Nul) do
+            (write-char char result)
+          finally (setf size i))
+    (values (get-output-stream-string result) size)))
