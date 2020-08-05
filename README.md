@@ -56,6 +56,7 @@ mentioned in RFC 4251.
 | `:uint16-le`    | Unsigned 16-bit integer in little-endian byte order |
 | `:uint32-le`    | Unsigned 32-bit integer in little-endian byte order |
 | `:uint64-le`    | Unsigned 64-bit integer in little-endian byte order |
+| `:c-string`     | NULL-terminated C string                            |
 
 ## Usage
 
