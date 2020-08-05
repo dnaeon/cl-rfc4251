@@ -50,13 +50,14 @@ In addition to the above data types the `cl-rfc4251` system supports
 encoding and decoding of these types as well. Note, that these are not
 mentioned in RFC 4251.
 
-| cl-rfc4251 type | Description                                         |
-|-----------------|-----------------------------------------------------|
-| `:uint16-be`    | Unsigned 16-bit integer in big-endian byte order    |
-| `:uint16-le`    | Unsigned 16-bit integer in little-endian byte order |
-| `:uint32-le`    | Unsigned 32-bit integer in little-endian byte order |
-| `:uint64-le`    | Unsigned 64-bit integer in little-endian byte order |
-| `:c-string`     | NULL-terminated C string                            |
+| cl-rfc4251 type | Description                                           |
+|-----------------|-------------------------------------------------------|
+| `:uint16-be`    | Unsigned 16-bit integer in big-endian byte order      |
+| `:uint16-le`    | Unsigned 16-bit integer in little-endian byte order   |
+| `:uint32-le`    | Unsigned 32-bit integer in little-endian byte order   |
+| `:uint64-le`    | Unsigned 64-bit integer in little-endian byte order   |
+| `:c-string`     | NULL-terminated C string                              |
+| `:buffer`       | A buffer similar to `:string`, but contains raw bytes |
 
 ## Usage
 
@@ -120,6 +121,17 @@ CL-USER> (let ((s (rfc4251:make-binary-input-stream #(#x00 #x00 #x00 #x05 #xFF #
 The second value in the example above, which specifies the number of
 bytes being read is `9`, because we had to read one `uint32` value
 (the header) and additional `5` bytes (the value partition).
+
+A bytes buffer is similar to a `:string`, except that the bytes are
+not explicitely converted to a string value, but instead the result
+contains the raw bytes.
+
+``` common-lisp
+CL-USER> (let ((s (rfc4251:make-binary-input-stream #(#x00 #x00 #x00 #x04 #x0A #x0B #x0C #x0D))))
+           (rfc4251:decode :buffer s))
+#(10 11 12 13)
+8
+```
 
 ### Encoding
 
@@ -198,6 +210,16 @@ CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :mpint #x-1234 s)
            (rfc4251:binary-output-stream-data s))
 #(0 0 0 2 237 204)
+```
+
+Encoding a bytes buffer. A bytes buffer is preceeded by its length,
+similar to the way `:string` values are being encoded.
+
+``` common-lisp
+CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
+           (rfc4251:encode :buffer #(#x0A #x0B #x0C #x0D) s)
+           (rfc4251:binary-output-stream-data s))
+#(0 0 0 4 10 11 12 13)
 ```
 
 ## Tests
