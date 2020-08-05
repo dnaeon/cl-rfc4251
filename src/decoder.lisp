@@ -47,10 +47,10 @@ bytes that were actually read to produce the value."))
 (defmethod decode ((type (eql :raw-bytes)) stream &key (length 1) (eof-error-p t) eof-value)
   "Read up to the given length of raw bytes from the stream"
   (assert (plusp length) (length))
-  (let ((result (make-array length :fill-pointer 0))
+  (let ((result (make-array 0 :fill-pointer 0 :adjustable t))
         (size length))
     (loop repeat length do
-      (vector-push (read-byte stream eof-error-p eof-value) result))
+      (vector-push-extend (read-byte stream eof-error-p eof-value) result))
     (values result size)))
 
 (defmethod decode ((type (eql :byte)) stream &key (eof-error-p t) eof-value)
