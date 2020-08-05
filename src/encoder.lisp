@@ -132,3 +132,11 @@ Returns the number of bytes that were written to the stream."))
       (encode :byte (char-code char) stream))
     (encode :byte (char-code #\Nul) stream)
     (1+ size)))
+
+(defmethod encode ((type (eql :buffer)) value stream &key)
+  "Encode a bytes buffer into the given stream"
+  (let ((size (length value)))
+    (encode :uint32 size stream)
+    (loop for byte across value do
+      (encode :byte byte stream))
+    (+ size 4)))

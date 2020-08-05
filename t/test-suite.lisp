@@ -287,8 +287,14 @@
           (stream2 (make-binary-output-stream)))
       (ok (= 4 (encode :buffer #() stream1))
           "Encode empty buffer")
-      (ok (= 8 (encode :buffer #(#x0A #x0B #x0C #x0D)))
-          "Encode non-empty buffer"))))
+      (ok (equalp #(#x00 #x00 #x00 #x00)
+                  (binary-output-stream-data stream1))
+          "Encoded empty buffer matches with expected data")
+      (ok (= 8 (encode :buffer #(#x0A #x0B #x0C #x0D) stream2))
+          "Encode non-empty buffer")
+      (ok (equalp #(#x00 #x00 #x00 #x04 #x0A #x0B #x0C #x0D)
+                  (binary-output-stream-data stream2))
+          "Encoded non-empty buffer matches with expected data"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
@@ -437,10 +443,11 @@
           (stream2 (make-binary-input-stream #(#x00 #x00 #x00 #x04 #x0A #x0B #x0C #x0D)))
           (stream3 (make-binary-input-stream #(#x00 #x00))) ;; Invalid size buffer
           (stream4 (make-binary-input-stream #(#x00 #x00 #x00 #x04 #xAB #xCD)))) ;; Invalid data partition
-      (ok (equal (list #() 4) (decode :buffer stream1))
+      (ok (equalp (list #() 4)
+                  (multiple-value-list (decode :buffer stream1)))
           "Decode empty buffer")
-      (ok (equal (list #(#x0A #x0B #x0C #x0D) 8)
-                 (decode :buffer stream2))
+      (ok (equalp (list #(#x0A #x0B #x0C #x0D) 8)
+                 (multiple-value-list (decode :buffer stream2)))
           "Decode non-empty buffer")
       (ok (signals (decode :buffer stream3))
           "Decode invalid buffer size")

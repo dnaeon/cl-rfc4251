@@ -160,3 +160,15 @@ bytes that were actually read to produce the value."))
             (write-char char result)
           finally (setf size i))
     (values (get-output-stream-string result) size)))
+
+(defmethod decode ((type (eql :buffer)) stream &key)
+  "Decode a bytes buffer from the given stream"
+  (let ((header-size 4) ;; uint32 specifying the buffer size
+        (length (decode :uint32 stream)))
+    ;; Empty buffer
+    (when (zerop length)
+      (return-from decode (values #() header-size)))
+    ;; Non-empty buffer
+    (values
+     (decode :raw-bytes stream :length length)
+     (+ header-size length))))
