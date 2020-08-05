@@ -267,7 +267,20 @@
           "Encode :name-list (zlib none) value")
       (ok (equalp #(#x00 #x00 #x00 #x09 #x7A #x6C #x69 #x62 #x2C #x6E #x6F #x6E #x65)
                   (binary-output-stream-data stream3))
-          "Encoded :name-list (zlib none) matches with expected data"))))
+          "Encoded :name-list (zlib none) matches with expected data")))
+
+  (testing "encode c-string"
+    (let ((stream1 (make-binary-output-stream))
+          (stream2 (make-binary-output-stream)))
+      (ok (= 1 (encode :c-string "" stream1))
+          "Encode empty c-string")
+      (ok (equalp #(#x00) (binary-output-stream-data stream1))
+          "Encoded empty c-string matches with the expected data")
+      (ok (= 14 (encode :c-string "Hello, World!" stream2))
+          "Encode non-empty c-string")
+      (ok (equalp #(#x48 #x65 #x6C #x6C #x6F #x2C #x20 #x57 #x6F #x72 #x6C #x64 #x21 #x00)
+                  (binary-output-stream-data stream2))
+          "Encoded non-empty c-string matches with expected data"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
@@ -399,4 +412,14 @@
           "Decode :name-list (zlib)")
       (ok (equal (list (list "zlib" "none") 13) ;; Total number of bytes read should 4 (uint32) + 9 (value partition)
                  (multiple-value-list (decode :name-list stream3)))
-          "Decode :name-list (zlib none)"))))
+          "Decode :name-list (zlib none)")))
+
+  (testing "decode c-string"
+    (let ((stream1 (make-binary-input-stream #(#x00)))
+          (stream2 (make-binary-input-stream #(#x48 #x65 #x6C #x6C #x6F #x2C #x20 #x57 #x6F #x72 #x6C #x64 #x21 #x00))))
+      (ok (equal (list "" 1)
+                  (multiple-value-list (decode :c-string stream1)))
+          "Decode empty c-string")
+      (ok (equal (list "Hello, World!" 14)
+                 (multiple-value-list (decode :c-string stream2)))
+          "Decode non-empty c-string"))))
