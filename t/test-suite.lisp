@@ -305,9 +305,6 @@
       (ok (equalp (list #(5 6 7 8) 4)
                   (multiple-value-list (decode :raw-bytes stream :length 4)))
           "Decode second slice of four bytes")
-      (ok (equalp (list #(9 10 :eof :eof) 4)
-                  (multiple-value-list (decode :raw-bytes stream :length 4 :eof-error-p nil :eof-value :eof)))
-          "Decode third slice with eof values")
       (ok (signals (decode :raw-bytes stream :length 1000))
           "Decode out of bounds :length bytes")
       (ok (signals (decode :raw-bytes stream :length -1000))
@@ -319,10 +316,7 @@
         (ok (equal (list (1+ index) 1)
                    (multiple-value-list (decode :byte stream)))
             (format nil "Decode byte at index ~r"  index)))
-      (ok (signals (decode :byte stream)) "End of stream")
-      (ok (equal (list :eof 1)
-                 (multiple-value-list (decode :byte stream :eof-error-p nil :eof-value :eof)))
-          "Decode with EOF value")))
+      (ok (signals (decode :byte stream)) "End of stream")))
 
   (testing "decode boolean"
     (let ((stream (make-binary-input-stream #(0 1 42 128))))

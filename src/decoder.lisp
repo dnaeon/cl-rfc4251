@@ -44,19 +44,20 @@
 stream. Returns multiple values -- the decoded value and the number of
 bytes that were actually read to produce the value."))
 
-(defmethod decode ((type (eql :raw-bytes)) stream &key (length 1) (eof-error-p t) eof-value)
+(defmethod decode ((type (eql :raw-bytes)) stream &key (length 1))
   "Read up to the given length of raw bytes from the stream"
   (assert (plusp length) (length))
-  (let ((result (make-array 0 :fill-pointer 0 :adjustable t))
+  (let ((result (make-array length :element-type '(unsigned-byte 8)))
         (size length))
-    (loop repeat length do
-      (vector-push-extend (read-byte stream eof-error-p eof-value) result))
+    (loop repeat length
+          for idx from 0 do
+      (setf (aref result idx) (read-byte stream)))
     (values result size)))
 
-(defmethod decode ((type (eql :byte)) stream &key (eof-error-p t) eof-value)
+(defmethod decode ((type (eql :byte)) stream &key)
   "Decode a single byte (octet) from the given binary stream"
   (let ((size 1))
-    (values (read-byte stream eof-error-p eof-value) size)))
+    (values (read-byte stream) size)))
 
 (defmethod decode ((type (eql :boolean)) stream &key)
   "Decode a boolean value from the given binary stream"
@@ -133,8 +134,8 @@ bytes that were actually read to produce the value."))
 
 (defmethod decode ((type (eql :mpint)) stream &key)
   "Decode a multiple precision integer in two's complement format"
-  (let* ((header-size 4) ;; Size of the uint32 number specifying the mpint length
-         (length (decode :uint32-be stream)))
+  (let ((header-size 4) ;; Size of the uint32 number specifying the mpint length
+        (length (decode :uint32-be stream)))
     (when (zerop length)
       (return-from decode (values 0 header-size)))
 
