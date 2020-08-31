@@ -148,7 +148,7 @@ bytes that were actually read to produce the value."))
   "Decode a comma-separated list of names from the given binary stream"
   (multiple-value-bind (value size) (decode :string stream)
     (values
-     (split-string value :separator (list #\Comma))
+     (split-string value :separator (list #\,))
      size)))
 
 (defmethod decode ((type (eql :c-string)) stream &key)
