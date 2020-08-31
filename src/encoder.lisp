@@ -59,12 +59,14 @@ Returns the number of bytes that were written to the stream."))
 
 (defmethod encode ((type (eql :uint16-be)) value stream &key)
   "Encode an unsigned 16-bit integer in big-endian byte order"
-  (declare ((unsigned-byte 16) value))
+  (declare (type (unsigned-byte 16) value))
+  (declare (optimize (safety 3)))
   (encode :raw-bytes (encode-int-be value :add-sign nil :min-bytes 2) stream))
 
 (defmethod encode ((type (eql :uint16-le)) value stream &key)
   "Encode an unsigned 16-bit integer in little-endian byte order"
-  (declare ((unsigned-byte 16) value))
+  (declare (type (unsigned-byte 16) value))
+  (declare (optimize (safety 3)))
   (encode :raw-bytes (encode-int-le value :add-sign nil :min-bytes 2) stream))
 
 (defmethod encode ((type (eql :uint16)) value stream &key)
@@ -73,12 +75,14 @@ Returns the number of bytes that were written to the stream."))
 
 (defmethod encode ((type (eql :uint32-be)) value stream &key)
   "Encode an unsigned 32-bit integer in big-endian byte order"
-  (declare ((unsigned-byte 32) value))
+  (declare (type (unsigned-byte 32) value))
+  (declare (optimize (safety 3)))
   (encode :raw-bytes (encode-int-be value :add-sign nil :min-bytes 4) stream))
 
 (defmethod encode ((type (eql :uint32-le)) value stream &key)
   "Encode an unsigned 32-bit integer in little-endian byte order"
-  (declare ((unsigned-byte 32) value))
+  (declare (type (unsigned-byte 32) value))
+  (declare (optimize (safety 3)))
   (encode :raw-bytes (encode-int-le value :add-sign nil :min-bytes 4) stream))
 
 (defmethod encode ((type (eql :uint32)) value stream &key)
@@ -87,12 +91,14 @@ Returns the number of bytes that were written to the stream."))
 
 (defmethod encode ((type (eql :uint64-be)) value stream &key)
   "Encode an unsigned 64-bit integer in big-endian byte order"
-  (declare ((unsigned-byte 64) value))
+  (declare (type (unsigned-byte 64) value))
+  (declare (optimize (safety 3)))
   (encode :raw-bytes (encode-int-be value :add-sign nil :min-bytes 8) stream))
 
 (defmethod encode ((type (eql :uint64-le)) value stream &key)
   "Encode an unsigned 64-bit integer in little-endian byte order"
-  (declare ((unsigned-byte 64) value))
+  (declare (type (unsigned-byte 64) value))
+  (declare (optimize (safety 3)))
   (encode :raw-bytes (encode-int-le value :add-sign nil :min-bytes 8) stream))
 
 (defmethod encode ((type (eql :uint64)) value stream &key)
@@ -109,7 +115,7 @@ Returns the number of bytes that were written to the stream."))
 
 (defmethod encode ((type (eql :mpint)) value stream &key)
   "Encode the given multiple precision integer value into the binary stream"
-  (declare ((integer) value))
+  (declare (type integer value))
 
   ;; Propery handle a zero mpint value
   (when (zerop value)
