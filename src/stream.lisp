@@ -41,8 +41,12 @@
    :make-binary-input-stream
    :binary-output-stream
    :binary-output-stream-data
-   :make-binary-output-stream))
+   :make-binary-output-stream
+   :get-binary-stream-bytes))
 (in-package :cl-rfc4251.stream)
+
+(defgeneric get-binary-stream-bytes (stream)
+  (:documentation "Returns the underlying bytes for a binary stream"))
 
 (defclass binary-input-stream (fundamental-binary-input-stream)
   ((data
@@ -60,6 +64,10 @@
     :reader binary-input-stream-end
     :documentation "End marker up to which bytes are to be read"))
   (:documentation "Binary input stream class using a vector as the underlying data"))
+
+(defmethod get-binary-stream-bytes ((s binary-input-stream))
+  (let ((data (binary-input-stream-data s)))
+    (coerce data '(simple-array (unsigned-byte 8) (*)))))
 
 (defun make-binary-input-stream (data &key (start 0) (end (length data)))
   "Creates a new instance of BINARY-INPUT-STREAM class"
@@ -93,6 +101,10 @@
     :accessor binary-output-stream-data
     :documentation "The underlying vector to which data is written"))
   (:documentation "Binary output stream class using a vector for the underlying data"))
+
+(defmethod get-binary-stream-bytes ((s binary-output-stream))
+  (let ((data (binary-output-stream-data s)))
+    (coerce data '(simple-array (unsigned-byte 8) (*)))))
 
 (defmethod stream-write-byte ((stream binary-output-stream) value)
   "Writes a byte to the given binary stream"

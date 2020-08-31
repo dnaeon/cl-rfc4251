@@ -49,7 +49,8 @@
    :make-binary-input-stream
    :binary-output-stream
    :binary-output-stream-data
-   :make-binary-output-stream)
+   :make-binary-output-stream
+   :get-binary-stream-bytes)
   (:export
    ;; util
    :encode-int-be
@@ -72,5 +73,6 @@
    :make-binary-input-stream
    :binary-output-stream
    :binary-output-stream-data
-   :make-binary-output-stream))
+   :make-binary-output-stream
+   :get-binary-stream-bytes))
 (in-package :cl-rfc4251)
