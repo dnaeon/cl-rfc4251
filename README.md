@@ -149,7 +149,7 @@ CL-USER> (defparameter *s* (rfc4251:make-binary-output-stream))
 *S*
 CL-USER> (rfc4251:encode :uint16 42 *s*)
 2
-CL-USER> (rfc4251:binary-output-stream-data *s*)
+CL-USER> (rfc4251:get-binary-stream-bytes *s*)
 #(0 42)
 ```
 
@@ -161,7 +161,7 @@ the actual encoded bytes.
 ``` common-lisp
 CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :uint16 42 s)          ;; <- Encode the value into the stream
-           (rfc4251:binary-output-stream-data s)) ;; <- Return the contents of the stream
+           (rfc4251:get-binary-stream-bytes s)) ;; <- Return the contents of the stream
 #(0 42)
 ```
 
@@ -172,7 +172,7 @@ CL-USER> (defparameter *s* (rfc4251:make-binary-output-stream))
 *S*
 CL-USER> (rfc4251:encode :string "Hello, World!" *s*)
 17
-CL-USER> (rfc4251:binary-output-stream-data *s*)
+CL-USER> (rfc4251:get-binary-stream-bytes *s*)
 #(0 0 0 13 72 101 108 108 111 44 32 87 111 114 108 100 33)
 ```
 
@@ -186,7 +186,7 @@ The following examples show how to encode `mpint` values according to
 ``` common-lisp
 CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :mpint #x00 s)         ;; <- Encode the zero value
-           (rfc4251:binary-output-stream-data s)) ;; <- Get the encoded data
+           (rfc4251:get-binary-stream-bytes s)) ;; <- Get the encoded data
 #(0 0 0 0)
 ```
 
@@ -196,19 +196,19 @@ Here are a few more examples taken directly from the examples described in
 ``` common-lisp
 CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :mpint #x-DEADBEEF s)
-           (rfc4251:binary-output-stream-data s))
+           (rfc4251:get-binary-stream-bytes s))
 #(0 0 0 5 255 33 82 65 17)
 CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :mpint #x80 s)
-           (rfc4251:binary-output-stream-data s))
+           (rfc4251:get-binary-stream-bytes s))
 #(0 0 0 2 0 128)
 CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :mpint #x9A378F9B2E332A7 s)
-           (rfc4251:binary-output-stream-data s))
+           (rfc4251:get-binary-stream-bytes s))
 #(0 0 0 8 9 163 120 249 178 227 50 167)
 CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :mpint #x-1234 s)
-           (rfc4251:binary-output-stream-data s))
+           (rfc4251:get-binary-stream-bytes s))
 #(0 0 0 2 237 204)
 ```
 
@@ -218,7 +218,7 @@ similar to the way `:string` values are being encoded.
 ``` common-lisp
 CL-USER> (let ((s (rfc4251:make-binary-output-stream)))
            (rfc4251:encode :buffer #(#x0A #x0B #x0C #x0D) s)
-           (rfc4251:binary-output-stream-data s))
+           (rfc4251:get-binary-stream-bytes s))
 #(0 0 0 4 10 11 12 13)
 ```
 
