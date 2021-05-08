@@ -123,3 +123,7 @@
 (defun make-binary-output-stream ()
   "Creates a new instance of BINARY-OUTPUT-STREAM"
   (make-instance 'binary-output-stream))
+
+(defmacro with-binary-output-stream ((s) &body body)
+  `(let ((,s (make-binary-output-stream)))
+     ,@body))
