@@ -32,39 +32,38 @@
    :decode
    :encode
    :binary-input-stream
-   :binary-input-stream-data
    :binary-input-stream-index
    :binary-input-stream-end
    :make-binary-input-stream
    :binary-output-stream
-   :binary-output-stream-data
-   :make-binary-output-stream))
+   :make-binary-output-stream
+   :get-binary-stream-bytes))
 (in-package :cl-rfc4251.test)
 
-(defparameter *binary-input-stream-data*
+(defparameter *test-data*
   #(1 2 3 4 5 6 7 8 9 10)
   "Test data for binary input streams")
 
 (deftest binary-input-stream
   (testing "binary-input-stream with defaults"
-    (let ((stream (make-binary-input-stream *binary-input-stream-data*)))
-      (ok (equalp *binary-input-stream-data* (binary-input-stream-data stream))
+    (let ((stream (make-binary-input-stream *test-data*)))
+      (ok (equalp *test-data* (get-binary-stream-bytes stream))
           "Input vector matches binary stream data")
-      (ok (= (binary-input-stream-end stream) (length *binary-input-stream-data*))
+      (ok (= (binary-input-stream-end stream) (length *test-data*))
           "Stream end marker matches length of input vector")
       (ok (= (binary-input-stream-index stream) 0)
           "Stream index marker is at 0")
-      (loop for byte across *binary-input-stream-data* do
+      (loop for byte across *test-data* do
         (ok (= (read-byte stream) byte)
             (format nil "Byte read from stream is ~d" byte)))
       (ok (equal (read-byte stream nil :eof) :eof)
           "Stream has been exhausted")
-      (ok (= (binary-input-stream-index stream) (length *binary-input-stream-data*))
+      (ok (= (binary-input-stream-index stream) (length *test-data*))
           "Stream index marker is at end")))
 
   (testing "binary-input-stream with start and end"
-    (let ((stream (make-binary-input-stream *binary-input-stream-data* :start 0 :end 4)))
-      (ok (equalp (binary-input-stream-data stream) *binary-input-stream-data*)
+    (let ((stream (make-binary-input-stream *test-data* :start 0 :end 4)))
+      (ok (equalp (get-binary-stream-bytes stream) *test-data*)
           "Input vector matches binary stream data")
       (ok (= (binary-input-stream-index stream) 0)
           "Stream index marker is at 0")
@@ -80,29 +79,29 @@
           "Stream index marker is at 4")))
 
   (testing "binary-input-stream with invalid start and end"
-    (ok (signals (make-binary-input-stream *binary-input-stream-data* :start -10))
+    (ok (signals (make-binary-input-stream *test-data* :start -10))
         "Negative :start value")
-    (ok (signals (make-binary-input-stream *binary-input-stream-data* :start 1000))
+    (ok (signals (make-binary-input-stream *test-data* :start 1000))
         "Out of bounds :start value")
-    (ok (signals (make-binary-input-stream *binary-input-stream-data* :end -1000))
+    (ok (signals (make-binary-input-stream *test-data* :end -1000))
         "Negative :end value")
-    (ok (signals (make-binary-input-stream *binary-input-stream-data* :end 1000))
+    (ok (signals (make-binary-input-stream *test-data* :end 1000))
         "Out of bounds :end value")
-    (ok (signals (make-binary-input-stream *binary-input-stream-data* :start 1000 :end 1000))
+    (ok (signals (make-binary-input-stream *test-data* :start 1000 :end 1000))
         "Invalid :start and :end values")))
 
 (deftest binary-output-stream
   (testing "write to binary-output-stream"
     (let ((stream (make-binary-output-stream)))
-      (ok (= 0 (length (binary-output-stream-data stream)))
+      (ok (= 0 (length (get-binary-stream-bytes stream)))
           "Stream data size is zero")
       (dotimes (i 10)
         (ok (= i (write-byte i stream))
             (format nil "Write byte ~r into stream" i)))
-      (ok (= 10 (length (binary-output-stream-data stream)))
+      (ok (= 10 (length (get-binary-stream-bytes stream)))
           "Stream size is ten")
       (ok (equalp #(#x00 #x01 #x02 #x03 #x04 #x05 #x06 #x07 #x08 #x09)
-                  (binary-output-stream-data stream))
+                  (get-binary-stream-bytes stream))
           "Stream data matches with written bytes"))))
 
 (deftest binary-encoder
@@ -112,7 +111,7 @@
       (dotimes (i iterations)
         (ok (= 1 (encode :byte i stream))
             (format nil "Encode byte #x~2,'0x" i)))
-      (ok (= iterations (length (binary-output-stream-data stream)))
+      (ok (= iterations (length (get-binary-stream-bytes stream)))
           (format nil "Binary output stream size is ~d" iterations))))
 
   (testing "encode raw-bytes"
@@ -122,12 +121,12 @@
           (data #(#x00 #x01 #x02 #x03 #x04 #x05 #x06 #x07 #x08 #x09)))
       (ok (= (length data) (encode :raw-bytes data stream1))
           "Encode raw bytes into stream1")
-      (ok (equalp data (binary-output-stream-data stream1))
+      (ok (equalp data (get-binary-stream-bytes stream1))
           "Encoded data matches with input data")
       (ok (= 5 (encode :raw-bytes data stream2 :length 5))
           "Encode raw-bytes with length 5")
       (ok (equalp #(#x00 #x01 #x02 #x03 #x04)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encoded data is a vector of size 5")
       (ok (signals (encode :raw-bytes data stream2 :length 0))
           "Signals on encoding with length 0")
@@ -135,7 +134,7 @@
           "Signals on encoding with negative length")
       (ok (= (length data) (encode :raw-bytes data stream3 :length 1000))
           "Encode raw-bytes with length greater than input data")
-      (ok (equalp data (binary-output-stream-data stream3))
+      (ok (equalp data (get-binary-stream-bytes stream3))
           "Encoded raw-bytes matches with input data, while using a greater length")))
 
   (testing "encode boolean"
@@ -145,7 +144,7 @@
       (ok (= 1 (encode :boolean nil stream))
           "Encode NIL as boolean")
       (ok (equalp #(#x01 #x00)
-                  (binary-output-stream-data stream))
+                  (get-binary-stream-bytes stream))
           "Encoded boolean values match with expected data")))
 
   (testing "encode uint16"
@@ -155,12 +154,12 @@
       (ok (= 2 (encode :uint16-be value stream1))
           "Encode #x0A1B uint16-be -- expect 2 bytes to be written")
       (ok (equalp #(#x0A #x1B)
-                  (binary-output-stream-data stream1))
+                  (get-binary-stream-bytes stream1))
           "Encode #x0A1B uint16-be -- expect data to be #(#x0A #x1B)")
       (ok (= 2 (encode :uint16-le value stream2))
           "Encode #x0A1B uint16-le -- expect 2 bytes to be written")
       (ok (equalp #(#x1B #x0A)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encode #x0A1B uint16-le -- expect data to be #(#x1B #x0A)")
       (ok (signals (encode :uint16-be #x29B7F4AA stream1))
           "Expect to signal when using larger than 16-bit value")))
@@ -172,17 +171,17 @@
       (ok (= 4 (encode :uint32-be #x0A1B stream1))
           "Encode #x0A1B uint32-be -- expect 4 bytes to be written")
       (ok (equalp #(#x00 #x00 #x0A #x1B)
-                  (binary-output-stream-data stream1))
+                  (get-binary-stream-bytes stream1))
           "Encode #x0A1B uint32-be -- expect data to be #(#x00 #x00 #x0A #x1B)")
       (ok (= 4 (encode :uint32-le #x0A1B stream2))
           "Encode #x0A1B uint32-le -- expect 4 bytes to be written")
       (ok (equalp #(#x1B #x0A #x00 #x00)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encode #x0A1B uint32-le -- expect data to be #(#x1B #x0A #x00 #x00)")
       (ok (= 4 (encode :uint32-be #x29B7F4AA stream3))
           "Encode #x29B7F4AA uint32-le -- expect 4 bytes to be written")
       (ok (equalp #(#x29 #xB7 #xF4 #xAA)
-                  (binary-output-stream-data stream3))
+                  (get-binary-stream-bytes stream3))
           "Encode #x29B7F4AA :uint32-be -- expect data to be #(#x29 #xB7 #xF4 #xAA)")
       (ok (signals (encode :uint32-be #xCDAB000000000000 stream1))
           "Expect to signal when using larger than 32-bit value")))
@@ -193,12 +192,12 @@
       (ok (= 8 (encode :uint64-be #x000000000000ABCD stream1))
           "Encode #x000000000000ABCD :uint64-be -- expect 8 bytes to be written")
       (ok (equalp #(#x00 #x00 #x00 #x00 #x00 #x00 #xAB #xCD)
-                  (binary-output-stream-data stream1))
+                  (get-binary-stream-bytes stream1))
           "Encode #x000000000000ABCD :uint64-be -- expect data to be #(#x00 #x00 #x00 #x00 #x00 #x00 #xAB #xCD)")
       (ok (= 8 (encode :uint64-le #x000000000000ABCD stream2))
           "Encode #x000000000000ABCD :uint64-le -- expect 8 bytes to be written")
       (ok (equalp #(#xCD #xAB #x00 #x00 #x00 #x00 #x00 #x00)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encode #x000000000000ABCD :uint64-le -- expect data to be #(#xCD #xAB #x00 #x00 #x00 #x00 #x00 #x00)")
       (ok (signals (encode :uint64-be #xCDAB00000000000000 stream1))
           "Expect to signal when using larger than 64-bit value")))
@@ -209,12 +208,12 @@
       (ok (= 11 (encode :string "testing" stream1))
           "Encode non-empty string value")
       (ok (equalp #(#x00 #x00 #x00 #x07 #x74 #x65 #x73 #x74 #x69 #x6E #x67)
-                  (binary-output-stream-data stream1))
+                  (get-binary-stream-bytes stream1))
           "Encoded non-empty string data matches")
       (ok (= 4 (encode :string "" stream2))
           "Encode empty string value")
       (ok (equalp #(#x00 #x00 #x00 #x00)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encoded empty string data matches")))
 
   (testing "encode mpint"
@@ -226,27 +225,27 @@
       (ok (= 4 (encode :mpint 0 stream1))
           "Encode mpint 0 value")
       (ok (equalp #(#x00 #x00 #x00 #x00)
-                  (binary-output-stream-data stream1))
+                  (get-binary-stream-bytes stream1))
           "Encoded mpint 0 value matches with the expected data")
       (ok (= 6 (encode :mpint #x80 stream2))
           "Encode mpint #x80 value")
       (ok (equalp #(#x00 #x00 #x00 #x02 #x00 #x80)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encoded mpint #x80 value matches with the expected data")
       (ok (= 6 (encode :mpint #x-1234 stream3))
           "Encode mpint #x-1234 value")
       (ok (equalp #(#x00 #x00 #x00 #x02 #xED #xCC)
-                  (binary-output-stream-data stream3))
+                  (get-binary-stream-bytes stream3))
           "Encoded mpint #x-1234 matches with the expected data")
       (ok (= 9 (encode :mpint #x-DEADBEEF stream4))
           "Encode mpint #x-DEADBEEF value")
       (ok (equalp #(#x00 #x00 #x00 #x05 #xFF #x21 #x52 #x41 #x11)
-                  (binary-output-stream-data stream4))
+                  (get-binary-stream-bytes stream4))
           "Encoded mpint #x-DEADBEEF value matches with the expected data")
       (ok (= 12 (encode :mpint #x9A378F9B2E332A7 stream5))
           "Encode mpint #x9A378F9B2E332A7 value")
       (ok (equalp #(#x00 #x00 #x00 #x08 #x09 #xA3 #x78 #xF9 #xB2 #xE3 #x32 #xA7)
-                  (binary-output-stream-data stream5))
+                  (get-binary-stream-bytes stream5))
           "Encoded mpint #x9A378F9B2E332A7 matches with the expected data")))
 
   (testing "encode name-list"
@@ -256,17 +255,17 @@
       (ok (= 4 (encode :name-list nil stream1)) ;; Just the uint32 header value is expected
           "Encode empty :name-list value")
       (ok (equalp #(#x00 #x00 #x00 #x00)
-                  (binary-output-stream-data stream1))
+                  (get-binary-stream-bytes stream1))
           "Encoded empty :name-list value matches with expected data")
       (ok (= 8 (encode :name-list (list "zlib") stream2))
           "Encode :name-list (zlib) value")
       (ok (equalp #(#x00 #x00 #x00 #x04 #x7A #x6C #x69 #x62)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encoded :name-list (zlib) matches with expected data")
       (ok (= 13 (encode :name-list (list "zlib" "none") stream3))
           "Encode :name-list (zlib none) value")
       (ok (equalp #(#x00 #x00 #x00 #x09 #x7A #x6C #x69 #x62 #x2C #x6E #x6F #x6E #x65)
-                  (binary-output-stream-data stream3))
+                  (get-binary-stream-bytes stream3))
           "Encoded :name-list (zlib none) matches with expected data")))
 
   (testing "encode c-string"
@@ -274,12 +273,12 @@
           (stream2 (make-binary-output-stream)))
       (ok (= 1 (encode :c-string "" stream1))
           "Encode empty c-string")
-      (ok (equalp #(#x00) (binary-output-stream-data stream1))
+      (ok (equalp #(#x00) (get-binary-stream-bytes stream1))
           "Encoded empty c-string matches with the expected data")
       (ok (= 14 (encode :c-string "Hello, World!" stream2))
           "Encode non-empty c-string")
       (ok (equalp #(#x48 #x65 #x6C #x6C #x6F #x2C #x20 #x57 #x6F #x72 #x6C #x64 #x21 #x00)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encoded non-empty c-string matches with expected data")))
 
   (testing "encode buffer"
@@ -288,17 +287,17 @@
       (ok (= 4 (encode :buffer #() stream1))
           "Encode empty buffer")
       (ok (equalp #(#x00 #x00 #x00 #x00)
-                  (binary-output-stream-data stream1))
+                  (get-binary-stream-bytes stream1))
           "Encoded empty buffer matches with expected data")
       (ok (= 8 (encode :buffer #(#x0A #x0B #x0C #x0D) stream2))
           "Encode non-empty buffer")
       (ok (equalp #(#x00 #x00 #x00 #x04 #x0A #x0B #x0C #x0D)
-                  (binary-output-stream-data stream2))
+                  (get-binary-stream-bytes stream2))
           "Encoded non-empty buffer matches with expected data"))))
 
 (deftest binary-decoder
   (testing "decode raw bytes"
-    (let ((stream (make-binary-input-stream *binary-input-stream-data*)))
+    (let ((stream (make-binary-input-stream *test-data*)))
       (ok (equalp (list #(1 2 3 4) 4)
                   (multiple-value-list (decode :raw-bytes stream :length 4)))
           "Decode first slice of four bytes")
@@ -311,8 +310,8 @@
           "Decode bytes with invalid :length value")))
 
   (testing "decode byte"
-    (let ((stream (make-binary-input-stream *binary-input-stream-data*)))
-      (loop for index below (length *binary-input-stream-data*) do
+    (let ((stream (make-binary-input-stream *test-data*)))
+      (loop for index below (length *test-data*) do
         (ok (equal (list (1+ index) 1)
                    (multiple-value-list (decode :byte stream)))
             (format nil "Decode byte at index ~r"  index)))

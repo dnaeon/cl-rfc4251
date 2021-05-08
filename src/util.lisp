@@ -88,6 +88,6 @@
 (defun twos-complement (n n-bits)
   "Returns the two's complement of the given number"
   (assert (plusp n-bits) (n-bits))
-  (let* ((mask (expt 2 (1- n-bits))))
+  (let ((mask (expt 2 (1- n-bits))))
     (+ (- (logand n mask))
        (logand n (lognot mask)))))
