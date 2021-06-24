@@ -51,6 +51,7 @@
    :binary-output-stream-data
    :make-binary-output-stream
    :get-binary-stream-bytes
+   :with-binary-input-stream
    :with-binary-output-stream)
   (:export
    ;; util
@@ -76,5 +77,6 @@
    :binary-output-stream-data
    :make-binary-output-stream
    :get-binary-stream-bytes
+   :with-binary-input-stream
    :with-binary-output-stream))
 (in-package :cl-rfc4251)

@@ -127,3 +127,7 @@
 (defmacro with-binary-output-stream ((s) &body body)
   `(let ((,s (make-binary-output-stream)))
      ,@body))
+
+(defmacro with-binary-input-stream ((s data) &body body)
+  `(let ((,s (make-binary-input-stream ,data)))
+     ,@body))
